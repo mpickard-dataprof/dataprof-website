@@ -1,0 +1,23 @@
+{
+  "index.qmd": {
+    "index.html": "672f408f"
+  },
+  "about.qmd": {
+    "about.html": "7800c4ec"
+  },
+  "posts/post-with-code/index.qmd": {
+    "index.html": "757f1cbd"
+  },
+  "posts/welcome/index.qmd": {
+    "index.html": "24bb5821"
+  },
+  "posts/using-xgboost-and-sklearn-to-predict-loan-default/index.en.markdown": {
+    "index.en.html": "8b1ad819"
+  },
+  "posts/regex-preserve_currency_tokens/index.qmd": {
+    "index.html": "ab860486"
+  },
+  "posts/using-xgboost-and-sklearn-to-predict-loan-default/index.qmd": {
+    "index.html": "2654599c"
+  }
+}

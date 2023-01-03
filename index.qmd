@@ -1,0 +1,15 @@
+---
+title: "Matt Pickard"
+listing:
+  contents: posts
+  sort: "date desc"
+  type: default
+  categories: true
+  sort-ui: false
+  filter-ui: false
+page-layout: full
+title-block-banner: "#c3cbd9"
+title-block-banner-color: "#4d4f52"
+---
+
+
