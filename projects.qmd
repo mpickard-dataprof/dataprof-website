@@ -1,0 +1,7 @@
+---
+title: "Projects"
+format: html
+---
+
+A place to showcase my projects.
+

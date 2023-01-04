@@ -4,18 +4,29 @@ project:
 website:
   title: "The Data Professor"
   navbar:
+    background: light
+    left:
+      - blog.qmd
+      - projects.qmd
     right:
       - about.qmd
       - icon: github
-        href: https://github.com/
+        href: https://github.com/mpickard-dataprof
+      - icon: linked
+        href: https://www.linkedin.com/in/mattpickard/
       - icon: twitter
-        href: https://twitter.com
+        href: https://twitter.com/matt_d_pickard
+
 format:
   html:
-    theme: journal
+    light: journal
+    dark: darkly
     css: styles.css
     toc: true
     code-line-numbers: true
+    highlight-style: atom-one
+    code-block-border-left: true
+  
 
 
 

@@ -5,5 +5,12 @@
       "/posts/regex-preserve_currency_tokens/index.html",
       "/posts/using-xgboost-and-sklearn-to-predict-loan-default/index.html"
     ]
+  },
+  {
+    "listing": "/blog.html",
+    "items": [
+      "/blog/posts/regex-preserve_currency_tokens.html",
+      "/blog/posts/using-xgboost-and-sklearn-to-predict-loan-default.html"
+    ]
   }
 ]

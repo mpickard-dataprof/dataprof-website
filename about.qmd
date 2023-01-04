@@ -1,8 +1,8 @@
 ---
 title: "About"
-image: profile.jpg
+image: about_profile.jpg
 about:
-  template: jolla
+  template: solana
   links:
     - icon: twitter
       text: Twitter
@@ -15,5 +15,38 @@ about:
       href: https://github.com
 
 ---
+# Education
+**Brigham Young University** | Provo, UT
 
-About this blog
+B.S. in Computer Engineering | 2002
+
+**Brigham Young University** | Provo, UT
+
+MBA in Operations and Information Systems | 2008
+
+**University of Arizona** | Tucson, AZ
+
+Ph.D. in Management Information Systems | 2012
+
+# Experience
+**National Instruments** 
+
+Applications Engineer | 2002 - 2004
+
+Software Engineer / Project Manager | 2004 - 2006
+
+**Raytheon Missile Systems** 
+
+Technical Instructor | 2010
+
+**Sandia National Labs** 
+
+Faculty Summer Intern - Data Analytics | 2017
+
+**University of New Mexico** 
+
+Assistant Professor of AIS and Analytics | 2012-2018
+
+**Northern Illinois University** 
+
+Associate Professor of Data and Analytics | 2018-present

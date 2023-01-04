@@ -16,7 +16,7 @@ I wanted to combine `xgboost` with `sklearn` pipelines to process a `pandas` Dat
 # Load the data
 ```{python}
 # Load the data
-loan_df = pd.read_csv("Loan_Default.csv")
+loan_df = pd.read_csv("data/Loan_Default.csv")
 ```
 
 # Create labels and features

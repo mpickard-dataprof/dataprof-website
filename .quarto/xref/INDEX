@@ -19,5 +19,17 @@
   },
   "posts/using-xgboost-and-sklearn-to-predict-loan-default/index.qmd": {
     "index.html": "2654599c"
+  },
+  "blog.qmd": {
+    "blog.html": "302a3c3a"
+  },
+  "projects.qmd": {
+    "projects.html": "70beef9f"
+  },
+  "blog/posts/using-xgboost-and-sklearn-to-predict-loan-default.qmd": {
+    "using-xgboost-and-sklearn-to-predict-loan-default.html": "47859f32"
+  },
+  "blog/posts/regex-preserve_currency_tokens.qmd": {
+    "regex-preserve_currency_tokens.html": "0d2a4ae6"
   }
 }
