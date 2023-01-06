@@ -31,5 +31,14 @@
   },
   "blog/posts/regex-preserve_currency_tokens.qmd": {
     "regex-preserve_currency_tokens.html": "0d2a4ae6"
+  },
+  "blog/dataprep/regex-preserve_currency_tokens.qmd": {
+    "regex-preserve_currency_tokens.html": "ed7f4e12"
+  },
+  "blog/machinelearn/using-xgboost-and-sklearn-to-predict-loan-default.qmd": {
+    "using-xgboost-and-sklearn-to-predict-loan-default.html": "3ede2289"
+  },
+  "blog/dataprep/simple-low-variance-feature-selection-mask-in-r.qmd": {
+    "simple-low-variance-feature-selection-mask-in-r.html": "8cd078c5"
   }
 }

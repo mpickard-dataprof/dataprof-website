@@ -3,11 +3,12 @@ title: regex to Preserve Currency Tokens
 description: Development of a regex to preserve currency values in the U.S. Tax Code.
 author: Matt Pickard
 date: '2022-03-14'
-categories: [regex, data preparation]
+date-modified: "last-modified"
+categories: [regex, data preparation, python, r]
 ---
 
 # Introduction
-I've been working to collect a corpus of tax legislation, regulations, and court cases. At the core of my corpus is the United States Code Title 26 (USC26), otherwise known as the Internal Revenue Code or the U.S. Tax Code. I'm using the corpus to train a tax-specific word embedding. Word embeddings capture similarity semantics of tokens (words, or multi-word phrases) by encoding them into a n-dimensional space. Similar tokens are embedded into the n-dimensional space in close proximity.
+I've been working to collect a corpus of tax legislation, regulations, and court cases. At the core of my corpus is the United States Code Title 26 (USC26), otherwise known as the Internal Revenue Code or the U.S. Tax Code. I'm using the corpus to train a tax-specific word embedding. Word embeddings capture similarity semantics of tokens (words, or multi-word phrases) by encoding them into an n-dimensional space. Similar tokens are embedded into the n-dimensional space in close proximity.
 
 Since currency values may have important semantic meaning in the USC--for instance, tax bracket boundaries--I want to preserve them so the tokenizer does not break them apart. To do this, I want to replace spaces, commas, decimals, and dollar signs with underscores.  Here are some examples:
 
@@ -17,6 +18,7 @@ Since currency values may have important semantic meaning in the USC--for instan
 | $2.5 million | 2_5_million_usd |
 | $56,750.25   | 56_750_25_usd   |
 
+: Examples of Currency Values
 
 # Implementation
 The approach I took was to first match the different currency formats and then pass the match to a helper function that would replace spaces, commas, decimals, and dollar signs with underscores.

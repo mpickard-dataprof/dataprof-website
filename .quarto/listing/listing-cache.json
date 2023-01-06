@@ -5,7 +5,9 @@
     ],
     "blog.qmd": [
       "posts",
-      "blog/posts"
+      "blog/posts",
+      "blog/dataprep",
+      "blog/machinelearn"
     ]
   }
 }

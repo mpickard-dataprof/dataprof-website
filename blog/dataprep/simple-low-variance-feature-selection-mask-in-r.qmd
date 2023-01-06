@@ -1,0 +1,72 @@
+---
+title: Simple Feature Selection Using a Low-to-No Variance Mask
+description: Demonstrates how to remove features with low to no variance.
+author: Matt Pickard
+date: 2023-01-05
+date-modified: last-modified
+categories: []
+format: html
+
+---
+
+# Introduction
+
+# Setup
+For this example, we'll use a [credit score classification](https://www.kaggle.com/datasets/parisrohan/credit-score-classification) dataset from Kaggle, provided by [Rohan Paris](https://www.kaggle.com/datasets/parisrohan/credit-score-classification). The dataset is large, so I randomly sampled 20% of it. I did a little data cleaning and injected sparsity in some of the features. I also added a few features with low or no variance for demonstration purposes. 
+
+You can download the modified dataset <a href="data/credit_data.csv" download>here</a>.
+
+Since variance is conceptually simpler with continuous variables, let's only load the continuous variables into `credit_df`.
+
+```{r}
+library(tidyverse)
+library(knitr)
+
+credit_df <- 
+  read_csv("data/credit_data.csv") %>% 
+  select_if(is.numeric)
+``` 
+
+Here's peek at the data.
+
+```{r}
+kable(credit_df %>% head(5))
+```
+
+# Calculate feature variances
+We want to calculate the variance of each column. We'll use `across()` to apply `var()` to all columns with the `everything()` selector. Notice that we `scale()` the data before passing it to `var()`. It is important to normalize the data so the features are comparable with each other. In other words, variance is not comparable across different variables. 
+
+We use `tidyr`'s 
+Since we intend to identify low-variance features and variance is not comparable across features, we need to standardize the columns. We do this will `scale()`. To apply it to all columns 
+```{r}
+credit_variances <- credit_df %>% 
+  summarize(
+    across(
+        everything(), 
+        ~ var(scale(., center = FALSE)), 
+        na.rm = TRUE)) %>% 
+  pivot_longer(
+    everything(), 
+    names_to = "feature", 
+    values_to = "variance") %>% 
+  arrange(desc(variance)) 
+```
+
+
+# Set variance threshold and create a mask
+```{r}
+low_var_filter <- credit_variances %>% 
+  filter(variance < 0.1) %>% 
+  pull(feature)
+```
+
+
+# Apply the mask
+```{r}
+filtered_credit_df <- credit_df %>% 
+  select(-all_of(low_var_filter))
+
+kable(filtered_credit_df %>% head(5))
+```
+
+

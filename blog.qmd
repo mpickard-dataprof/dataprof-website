@@ -1,7 +1,9 @@
 ---
 title: "Blog"
 listing:
-  contents: blog/posts
+  contents: 
+    - blog/dataprep
+    - blog/machinelearn
   sort: "date desc"
   type: default
   categories: true
