@@ -11,7 +11,6 @@
     "items": [
       "/blog/dataprep/simple-low-variance-feature-selection-mask-in-r.html",
       "/blog/dataprep/regex-preserve_currency_tokens.html",
-      "/blog/machinelearn/posts/using-xgboost-and-sklearn-to-predict-loan-default.html",
       "/blog/machinelearn/using-xgboost-and-sklearn-to-predict-loan-default.html"
     ]
   }

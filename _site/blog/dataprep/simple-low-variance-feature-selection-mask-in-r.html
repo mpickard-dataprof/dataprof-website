@@ -213,7 +213,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">January 6, 2023</p>
+        <p class="date-modified">January 12, 2023</p>
       </div>
     </div>
       
@@ -228,11 +228,23 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#why-is-variance-important-in-feature-selection" id="toc-why-is-variance-important-in-feature-selection" class="nav-link" data-scroll-target="#why-is-variance-important-in-feature-selection">Why is variance important in feature selection?</a></li>
+  </ul></li>
+  <li><a href="#a-manual-method" id="toc-a-manual-method" class="nav-link" data-scroll-target="#a-manual-method">A manual method</a>
+  <ul class="collapse">
   <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
   <li><a href="#calculate-feature-variances" id="toc-calculate-feature-variances" class="nav-link" data-scroll-target="#calculate-feature-variances">Calculate feature variances</a></li>
   <li><a href="#set-variance-threshold-and-create-a-mask" id="toc-set-variance-threshold-and-create-a-mask" class="nav-link" data-scroll-target="#set-variance-threshold-and-create-a-mask">Set variance threshold and create a mask</a></li>
   <li><a href="#apply-the-mask" id="toc-apply-the-mask" class="nav-link" data-scroll-target="#apply-the-mask">Apply the mask</a></li>
+  </ul></li>
+  <li><a href="#a-better-way-tidymodels" id="toc-a-better-way-tidymodels" class="nav-link" data-scroll-target="#a-better-way-tidymodels">A better way – <code>tidymodels</code></a>
+  <ul class="collapse">
+  <li><a href="#load-data-with-categorical-variables" id="toc-load-data-with-categorical-variables" class="nav-link" data-scroll-target="#load-data-with-categorical-variables">Load data with categorical variables</a></li>
+  <li><a href="#define-a-recipe-object" id="toc-define-a-recipe-object" class="nav-link" data-scroll-target="#define-a-recipe-object">Define a recipe object</a></li>
+  <li><a href="#apply-the-recipe-to-credit_df" id="toc-apply-the-recipe-to-credit_df" class="nav-link" data-scroll-target="#apply-the-recipe-to-credit_df">Apply the recipe to <code>credit_df</code></a></li>
+  </ul></li>
   </ul>
 </nav>
     </div>
@@ -244,11 +256,21 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
+<p>One way to perform dimensionality reduction is through feature selection. In this post, we’ll explore how to create a low-variance feature mask (or filter). We’ll cover both a manual approach with <code>dplyr</code> functions and a more automated, production approach with <code>recipes</code> functions. Enjoy!</p>
+<section id="why-is-variance-important-in-feature-selection" class="level2">
+<h2 class="anchored" data-anchor-id="why-is-variance-important-in-feature-selection">Why is variance important in feature selection?</h2>
+<p>Variance is important in feature selection because of a concept called information gain. <em>Information gain</em> is what we know about one (usually unknown) variable because we can observe another known variable. In supervised learning, we use information from predictor variables to learn something about the target variable.</p>
+<p>To make this concrete, imagine we want to estimate loan applicants’ creditworthiness. Though we don’t have their credit scores, we do have their monthly income, age, and number of outstanding loans. If every applicant in our data set has three outstanding loans – that is, the number of outstanding loans didn’t vary – then “outstanding loans” does not differentiate loan applicants and, therefore, does not provide any information about the applicants that we can use to estimate their creditworthiness. Therefore, we’d say that number of outstanding loans provides no information gain about creditworthiness.</p>
+<p>We can remove features with little to no variance because they are not informative. Consider them useless fluff.</p>
 </section>
-<section id="setup" class="level1">
-<h1>Setup</h1>
-<p>For this example, we’ll use a <a href="https://www.kaggle.com/datasets/parisrohan/credit-score-classification">credit score classification</a> dataset from Kaggle, provided by <a href="https://www.kaggle.com/datasets/parisrohan/credit-score-classification">Rohan Paris</a>. The dataset is large, so I randomly sampled 20% of it. I did a little data cleaning and injected sparsity in some of the features. I also added a few features with low or no variance for demonstration purposes.</p>
-<p>You can download the modified dataset <a href="data/credit_data.csv" download="">here</a>.</p>
+</section>
+<section id="a-manual-method" class="level1">
+<h1>A manual method</h1>
+<p>We’ll start by creating a low-variance filter manually with <code>dplyr</code> functions.</p>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<p>For this example, we’ll use a <a href="https://www.kaggle.com/datasets/parisrohan/credit-score-classification">credit score classification</a> data set from Kaggle, provided by <a href="https://www.kaggle.com/datasets/parisrohan/credit-score-classification">Rohan Paris</a>. The data set is large, so I randomly sampled 20% of it. I also did a little data cleaning. As you’ll see, to make this exercise interesting, we’ll add a few low-variance features to demonstrate feature removal.</p>
+<p>You can download the cleaned data set <a href="data/credit_data.csv" download="">here</a>.</p>
 <p>Since variance is conceptually simpler with continuous variables, let’s only load the continuous variables into <code>credit_df</code>.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
@@ -258,7 +280,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb1-5"><a href="#cb1-5"></a>  <span class="fu">read_csv</span>(<span class="st">"data/credit_data.csv"</span>) <span class="sc">%&gt;%</span> </span>
 <span id="cb1-6"><a href="#cb1-6"></a>  <span class="fu">select_if</span>(is.numeric)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Here’s peek at the data.</p>
+<p>Here’s a peek at the data.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">kable</span>(credit_df <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -404,10 +426,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </div>
 </div>
 </section>
-<section id="calculate-feature-variances" class="level1">
-<h1>Calculate feature variances</h1>
-<p>We want to calculate the variance of each column. We’ll use <code>across()</code> to apply <code>var()</code> to all columns with the <code>everything()</code> selector. Notice that we <code>scale()</code> the data before passing it to <code>var()</code>. It is important to normalize the data so the features are comparable with each other. In other words, variance is not comparable across different variables.</p>
-<p>We use <code>tidyr</code>’s Since we intend to identify low-variance features and variance is not comparable across features, we need to standardize the columns. We do this will <code>scale()</code>. To apply it to all columns</p>
+<section id="calculate-feature-variances" class="level2">
+<h2 class="anchored" data-anchor-id="calculate-feature-variances">Calculate feature variances</h2>
+<p>To begin, let’s calculate the variance of each column. With <code>dplyr</code>, we’ll use <code>across()</code> to apply <code>var()</code> to all columns with the <code>everything()</code> selector. Notice that we <code>scale()</code> the data before passing it to <code>var()</code>. It is important to normalize the data so the features are comparable with each other. Unnormalized, <code>num_credit_card</code> and <code>monthly income</code>, have very different variances. To compare their influence on creditworthiness in a fair manner, we normalize them.</p>
+<p>We use <code>tidyr</code>’s <code>pivot_longer()</code> to pivot the scaled variances to columns. We’ll sort them from largest to smallest.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>credit_variances <span class="ot">&lt;-</span> credit_df <span class="sc">%&gt;%</span> </span>
 <span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">summarize</span>(</span>
@@ -419,24 +441,114 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb3-8"><a href="#cb3-8"></a>    <span class="fu">everything</span>(), </span>
 <span id="cb3-9"><a href="#cb3-9"></a>    <span class="at">names_to =</span> <span class="st">"feature"</span>, </span>
 <span id="cb3-10"><a href="#cb3-10"></a>    <span class="at">values_to =</span> <span class="st">"variance"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb3-11"><a href="#cb3-11"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(variance)) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-11"><a href="#cb3-11"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(variance)) </span>
+<span id="cb3-12"><a href="#cb3-12"></a></span>
+<span id="cb3-13"><a href="#cb3-13"></a><span class="fu">kable</span>(credit_variances)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<thead>
+<tr class="header">
+<th style="text-align: left;">feature</th>
+<th style="text-align: right;">variance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">num_of_loan</td>
+<td style="text-align: right;">0.98558800</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">interest_rate</td>
+<td style="text-align: right;">0.98258481</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">num_of_delayed_payment</td>
+<td style="text-align: right;">0.98150878</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">num_credit_inquiries</td>
+<td style="text-align: right;">0.97843457</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">num_bank_accounts</td>
+<td style="text-align: right;">0.97841843</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_emi_per_month</td>
+<td style="text-align: right;">0.97569764</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">annual_income</td>
+<td style="text-align: right;">0.97397017</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">num_credit_card</td>
+<td style="text-align: right;">0.97044729</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">amount_invested_monthly</td>
+<td style="text-align: right;">0.90345646</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">outstanding_debt</td>
+<td style="text-align: right;">0.41753915</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">monthly_inhand_salary</td>
+<td style="text-align: right;">0.35255863</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">delay_from_due_date</td>
+<td style="text-align: right;">0.33223435</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">changed_credit_limit</td>
+<td style="text-align: right;">0.30855481</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">monthly_balance</td>
+<td style="text-align: right;">0.22081631</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">credit_history_months</td>
+<td style="text-align: right;">0.15974632</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">age</td>
+<td style="text-align: right;">0.07874258</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">credit_utilization_ratio</td>
+<td style="text-align: right;">0.02527138</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </section>
-<section id="set-variance-threshold-and-create-a-mask" class="level1">
-<h1>Set variance threshold and create a mask</h1>
+<section id="set-variance-threshold-and-create-a-mask" class="level2">
+<h2 class="anchored" data-anchor-id="set-variance-threshold-and-create-a-mask">Set variance threshold and create a mask</h2>
+<p>We can scan down the variances and identify a natural cut-off between <code>amount_invested_monthly</code> and <code>outstanding_debt</code>, however, that would remove too many features. The next cutoff between <code>credit_history_month</code> and <code>age</code> seems more appropriate. So, we can create a variance filter with a threshold of 0.1.</p>
+<p>We use <code>pull()</code> to get an array of feature names that we can use as a mask.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>low_var_filter <span class="ot">&lt;-</span> credit_variances <span class="sc">%&gt;%</span> </span>
 <span id="cb4-2"><a href="#cb4-2"></a>  <span class="fu">filter</span>(variance <span class="sc">&lt;</span> <span class="fl">0.1</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">pull</span>(feature)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">pull</span>(feature)</span>
+<span id="cb4-4"><a href="#cb4-4"></a></span>
+<span id="cb4-5"><a href="#cb4-5"></a>low_var_filter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "age"                      "credit_utilization_ratio"</code></pre>
+</div>
 </div>
 </section>
-<section id="apply-the-mask" class="level1">
-<h1>Apply the mask</h1>
+<section id="apply-the-mask" class="level2">
+<h2 class="anchored" data-anchor-id="apply-the-mask">Apply the mask</h2>
+<p>We then apply the mask to the data frame. Notice that it removes ‘age’ and <code>credit_utilization_ratio</code>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>filtered_credit_df <span class="ot">&lt;-</span> credit_df <span class="sc">%&gt;%</span> </span>
-<span id="cb5-2"><a href="#cb5-2"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(low_var_filter))</span>
-<span id="cb5-3"><a href="#cb5-3"></a></span>
-<span id="cb5-4"><a href="#cb5-4"></a><span class="fu">kable</span>(filtered_credit_df <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>filtered_credit_df <span class="ot">&lt;-</span> credit_df <span class="sc">%&gt;%</span> </span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(low_var_filter))</span>
+<span id="cb6-3"><a href="#cb6-3"></a></span>
+<span id="cb6-4"><a href="#cb6-4"></a><span class="fu">kable</span>(filtered_credit_df <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped">
 <colgroup>
@@ -565,8 +677,87 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 </table>
 </div>
 </div>
+</section>
+</section>
+<section id="a-better-way-tidymodels" class="level1">
+<h1>A better way – <code>tidymodels</code></h1>
+<p>Creating a low-variance mask manually is good for learning purposes, but in real-world scenarios, it’s nice to have something more automated – that will work in a production pipeline – and more intelligent – that can handle categorical variables. The <code>recipes</code> package in <code>tidymodels</code> provides <code>step_zv()</code> and <code>step_nzv()</code> to features with zero or near-zero variance, respectively.</p>
+<section id="load-data-with-categorical-variables" class="level2">
+<h2 class="anchored" data-anchor-id="load-data-with-categorical-variables">Load data with categorical variables</h2>
+<p>To demonstrate the <code>recipes</code> approach, we’ll load all the features, so we have both continuous and categorical variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>credit_df <span class="ot">&lt;-</span> </span>
+<span id="cb7-2"><a href="#cb7-2"></a>  <span class="fu">read_csv</span>(<span class="st">"data/credit_data.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To make this example interesting, we’ll insert a couple of low-variance features – <code>num_credit_card</code> and <code>num_credit_inquiries</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>credit_df <span class="ot">&lt;-</span> credit_df <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb8-3"><a href="#cb8-3"></a>    <span class="at">num_credit_card_rand =</span> <span class="fu">runif</span>(<span class="fu">n</span>()),</span>
+<span id="cb8-4"><a href="#cb8-4"></a>    <span class="at">num_credit_inquiries_rand =</span> <span class="fu">runif</span>(<span class="fu">n</span>()),</span>
+<span id="cb8-5"><a href="#cb8-5"></a>    <span class="at">num_credit_card =</span> <span class="fu">if_else</span>(</span>
+<span id="cb8-6"><a href="#cb8-6"></a>      num_credit_card_rand <span class="sc">&lt;</span> .<span class="dv">95</span>, <span class="dv">5</span>, num_credit_card),</span>
+<span id="cb8-7"><a href="#cb8-7"></a>    <span class="at">num_credit_inquiries =</span> <span class="fu">if_else</span>(</span>
+<span id="cb8-8"><a href="#cb8-8"></a>      num_credit_inquiries_rand <span class="sc">&lt;</span> .<span class="dv">95</span>, <span class="dv">3</span>, num_credit_inquiries)</span>
+<span id="cb8-9"><a href="#cb8-9"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb8-10"><a href="#cb8-10"></a>  <span class="fu">select</span>(<span class="sc">-</span>num_credit_card_rand, <span class="sc">-</span>num_credit_inquiries_rand)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="define-a-recipe-object" class="level2">
+<h2 class="anchored" data-anchor-id="define-a-recipe-object">Define a recipe object</h2>
+<p>Then we define a recipe object. Notice the first parameter is a formula. We define <code>credit_score</code> as the target variable and all other features as predictor variables.</p>
+<p>We add the <code>step_zv()</code> step first. No-variance features will cause problems when we normalize the data with <code>step_scale()</code>. We apply the no-variance step to all predictors and the scale step to only the numeric predictors. Then, we apply <code>step_nzv()</code> to remove low-variance features. <code>prep()</code> “fits” the recipe to the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="fu">library</span>(recipes) </span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a>low_variance_recipe <span class="ot">&lt;-</span> <span class="fu">recipe</span>(credit_score <span class="sc">~</span> ., <span class="at">data =</span> credit_df) <span class="sc">%&gt;%</span></span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="fu">step_zv</span>(<span class="fu">all_predictors</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb9-5"><a href="#cb9-5"></a>  <span class="fu">step_scale</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb9-6"><a href="#cb9-6"></a>  <span class="fu">step_nzv</span>(<span class="fu">all_predictors</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb9-7"><a href="#cb9-7"></a>  <span class="fu">prep</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can use <code>tidy()</code> to peek into the recipe and see the effect it will have on the trained data set it was trained on. Here we look at the third step of the recipe – <code>step_nzv()</code>. We can see that it will remove our two low-variance features – <code>num_credit_card</code> and <code>num_credit_inquiries</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a><span class="fu">tidy</span>(low_variance_recipe, <span class="at">number =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  terms                id       
+  &lt;chr&gt;                &lt;chr&gt;    
+1 num_credit_card      nzv_5xxFQ
+2 num_credit_inquiries nzv_5xxFQ</code></pre>
+</div>
+</div>
+</section>
+<section id="apply-the-recipe-to-credit_df" class="level2">
+<h2 class="anchored" data-anchor-id="apply-the-recipe-to-credit_df">Apply the recipe to <code>credit_df</code></h2>
+<p>In <code>recipes</code> to apply a trained recipe to a data set, we can use <code>bake()</code>. The <code>new_data</code> parameter allows us to specify the data set “bake” the recipe with. If we pass NULL, it will bake the same data that the recipe was trained on.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>filtered_credit_df <span class="ot">&lt;-</span> low_variance_recipe <span class="sc">%&gt;%</span> <span class="fu">bake</span>(<span class="at">new_data =</span> <span class="cn">NULL</span>)</span>
+<span id="cb12-2"><a href="#cb12-2"></a></span>
+<span id="cb12-3"><a href="#cb12-3"></a><span class="fu">names</span>(filtered_credit_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "month"                    "age"                     
+ [3] "occupation"               "annual_income"           
+ [5] "monthly_inhand_salary"    "num_bank_accounts"       
+ [7] "interest_rate"            "num_of_loan"             
+ [9] "delay_from_due_date"      "num_of_delayed_payment"  
+[11] "changed_credit_limit"     "outstanding_debt"        
+[13] "credit_utilization_ratio" "payment_of_min_amount"   
+[15] "total_emi_per_month"      "amount_invested_monthly" 
+[17] "payment_behaviour"        "monthly_balance"         
+[19] "credit_history_months"    "credit_score"            </code></pre>
+</div>
+</div>
+<p>If we compare the names in the original <code>credit_df</code> to the names in the <code>filtered_credit_df</code>, we can see that <code>num_credit_card</code> and <code>num_credit_inquiries</code> were removed.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="fu">setdiff</span>(<span class="fu">names</span>(credit_df), <span class="fu">names</span>(filtered_credit_df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "num_credit_card"      "num_credit_inquiries"</code></pre>
+</div>
+</div>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
