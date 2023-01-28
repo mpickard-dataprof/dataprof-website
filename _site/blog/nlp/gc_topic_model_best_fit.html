@@ -1,0 +1,1567 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Matt Pickard">
+<meta name="dcterms.date" content="2023-01-24">
+
+<title>The Data Professor - seededlda Topic Model - Finding the best fit</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../">
+<script src="../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+
+
+<link rel="stylesheet" href="../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../index.html">
+    <span class="navbar-title">The Data Professor</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../projects.html">
+ <span class="menu-text">Projects</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mpickard-dataprof"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/mattpickard/"><i class="bi bi-linked" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/matt_d_pickard"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title"><code>seededlda</code> Topic Model - Finding the best fit</h1>
+                                <div class="quarto-categories">
+                <div class="quarto-category">topic modeling</div>
+                <div class="quarto-category">nlp</div>
+                <div class="quarto-category">multithread</div>
+              </div>
+                  </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Matt Pickard </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 24, 2023</p>
+      </div>
+    </div>
+    
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a></li>
+  <li><a href="#about-the-data" id="toc-about-the-data" class="nav-link" data-scroll-target="#about-the-data">About the data</a></li>
+  <li><a href="#objective" id="toc-objective" class="nav-link" data-scroll-target="#objective">Objective</a></li>
+  <li><a href="#preparing-the-data" id="toc-preparing-the-data" class="nav-link" data-scroll-target="#preparing-the-data">Preparing the data</a></li>
+  <li><a href="#loading-the-data" id="toc-loading-the-data" class="nav-link" data-scroll-target="#loading-the-data">Loading the data</a></li>
+  <li><a href="#the-topic-model" id="toc-the-topic-model" class="nav-link" data-scroll-target="#the-topic-model">The topic model</a>
+  <ul class="collapse">
+  <li><a href="#finding-the-maximum-divergence-the-quantitative-part" id="toc-finding-the-maximum-divergence-the-quantitative-part" class="nav-link" data-scroll-target="#finding-the-maximum-divergence-the-quantitative-part">Finding the maximum divergence – the quantitative part</a></li>
+  <li><a href="#interpreting-the-topics-the-qualitative-part" id="toc-interpreting-the-topics-the-qualitative-part" class="nav-link" data-scroll-target="#interpreting-the-topics-the-qualitative-part">Interpreting the topics – the qualitative part</a></li>
+  </ul></li>
+  <li><a href="#exploring-results" id="toc-exploring-results" class="nav-link" data-scroll-target="#exploring-results">Exploring results</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>Semi-annually, members of <a href="https://www.churchofjesuschrist.org/">The Church of Jesus Christ of Latter-day Saints</a> gather across the world for <a href="https://www.churchofjesuschrist.org/learn/general-conference?lang=eng">General Conference</a> (GC) to hear messages and talks about the gospel of Jesus Christ. These messages are delivered by prophets, apostles, and other leaders in the Church. GC occurs the first weekend of April and October. Although general conferences have occurred since the founding of the Church in 1830, [talks (and their text)] since 1971 are available on the Church’s website(https://www.churchofjesuschrist.org/study/general-conference).</p>
+<p>GC is one of my favorite times of the year! Seriously! For me, it competes with Christmas.</p>
+<p>Naturally, I’m curious about the topics that are taught at GC. I wanted to apply NLP topic modeling to GC.</p>
+</section>
+<section id="about-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="about-the-data">About the data</h2>
+<p>I was able to scrape the data from the <a href="https://www.churchofjesuschrist.org/learn/general-conference?lang=eng">GC website</a>.</p>
+<p>Every semi-annual conference has 4-5 sessions. Each session contains a series of talks. There are approximately 36-40 talks across all sessions in a conference. Every talk will be a document in topic modeling. Since I have the GC dates, I can study the topics longitudinally. I’m specifically curious about how the frequency of different topics has changed over the decades.</p>
+<p>I start simple and only deal with unigrams.</p>
+</section>
+<section id="objective" class="level2">
+<h2 class="anchored" data-anchor-id="objective">Objective</h2>
+<p>My objective in this post is to fit a topic model to the GC corpus. Therefore, I need to find the number of topics that best fits the data.</p>
+<p>The approach is very similar to clustering – another unsupervised algorithm. I’ll fit topic models using a range of different numbers of topics (20-topic model, 22-topic model,…,n-topic). Then calculate the divergence of each model and find the model with the maximum divergence.</p>
+<blockquote class="blockquote">
+<p>Perplexity is also a common metric used to explore the optimal number of topics. I use divergence because it is implemented in the <code>seededlda</code> package.</p>
+</blockquote>
+<p>I’ll then qualitatively assess a smaller range of models near the optimal divergence range.</p>
+<p>This post will demonstrate the beginning of this iterative quantitative-qualitative process to finding the optimal number of topics.</p>
+</section>
+<section id="preparing-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="preparing-the-data">Preparing the data</h2>
+<p>I used the <a href="https://github.com/juliasilge/tidytext"><code>tidytext</code></a> package<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> to tokenize the General Conference (GC) talks into unigrams. I removed common stopwords and did basic data cleaning. I then used <code>cast_dfm()</code> to convert the tidy text data frame to a document-feature matrix (DFM) compatible with <a href="https://quanteda.io/index.html"><code>quanteda</code></a>. This blog post starts with this DFM of the GC talks.</p>
+<p><code>quanteda</code> does not implement topic models, so I’ll use the Latent Dirichlet Allocation (LDA) implementation provided by the <a href="https://github.com/koheiw/seededlda"><code>seededlda</code></a> package to create the topic model.</p>
+</section>
+<section id="loading-the-data" class="level2">
+<h2 class="anchored" data-anchor-id="loading-the-data">Loading the data</h2>
+<p>I saved the DFM in an RDS format for quick retrieval. Let’s load the data and take a look at its dimensions.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(quanteda)</span>
+<span id="cb1-3"><a href="#cb1-3"></a>unigram_dfm <span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="st">"data/unigram_dfm.rds"</span>)</span>
+<span id="cb1-4"><a href="#cb1-4"></a><span class="fu">dim</span>(unigram_dfm)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1]  3881 16336</code></pre>
+</div>
+</div>
+<p>The matrix represents 3,881 documents (GC talks) and 16,336 words (unigrams). Keep in mind that many stopwords (e.g., the, and, am, etc.) were removed. The hope is that the remaining words are significant and salient.</p>
+</section>
+<section id="the-topic-model" class="level2">
+<h2 class="anchored" data-anchor-id="the-topic-model">The topic model</h2>
+<p>Like clustering algorithms, LDA requires that we specify the number of topics to fit. With close to 4k talks and 16k+ words, it wasn’t clear to me how many topics I should fit. To discover this, I leveraged the divergence metric of the topic model. <code>seededlda</code>, in its <code>divergence()</code> function, implements the Kullback-Leibler (KL) divergence, which is frequently used to measure the dissimilarities between word distributions (i.e., topics) <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>.</p>
+<p>In a nutshell, the logic of topic divergence is like this:</p>
+<ul>
+<li><strong>Topics</strong> consist of <em>individual words</em>. For example,
+<ul>
+<li><strong>Family</strong>: <em>children, family, home, parents, love, god, husband, wife</em></li>
+<li><strong>Missionary Work</strong>: <em>mission, missionary, serve, gospel, elder, lord</em></li>
+<li><strong>Savior</strong>: <em>love, christ, jesus, savior, father, heart</em></li>
+</ul></li>
+<li>The words that make up topics can overlap, meaning that the words can appear in several topics. For instance, <em>love</em> appears in both the <strong>Savior</strong> and <strong>Family</strong> topics.</li>
+<li>When we minimize the overlap, or maximize the divergence, of topics; then we have some assurance that we have the most distinct and useful topics.</li>
+</ul>
+<p>To find the optimal number of topics, I fit topic models with 2 to 52 topics.</p>
+<blockquote class="blockquote">
+<p>Note: There was a bit of trial and error to arrive at that range.</p>
+</blockquote>
+<p>Then I plotted their divergence scores to see where they maxed out.</p>
+<p>Since fitting LDA models is computationally expensive, I used the <code>furrr</code> package – the parallelized version of <code>purrr</code> – on my high-powered server to fit all those models.</p>
+<p>Then I combined the divergence score with each topic model into a data frame, so I could plot them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">library</span>(seededlda)</span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="fu">library</span>(furrr)</span>
+<span id="cb3-3"><a href="#cb3-3"></a></span>
+<span id="cb3-4"><a href="#cb3-4"></a><span class="co"># create a vector for number of topics to fit</span></span>
+<span id="cb3-5"><a href="#cb3-5"></a>n <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="dv">2</span>, <span class="dv">52</span>, <span class="at">by =</span> <span class="dv">2</span>)</span>
+<span id="cb3-6"><a href="#cb3-6"></a></span>
+<span id="cb3-7"><a href="#cb3-7"></a><span class="co"># helper function that fits the LDA model and computes the divergence</span></span>
+<span id="cb3-8"><a href="#cb3-8"></a><span class="co"># this is to parallelize the code with the 'furrr' package</span></span>
+<span id="cb3-9"><a href="#cb3-9"></a>get_div_score <span class="ot">&lt;-</span> <span class="cf">function</span>(dfm, k) {</span>
+<span id="cb3-10"><a href="#cb3-10"></a>  lda_fit <span class="ot">&lt;-</span> <span class="fu">textmodel_lda</span>(dfm, k)</span>
+<span id="cb3-11"><a href="#cb3-11"></a>  <span class="fu">return</span>(<span class="fu">divergence</span>(lda_fit))</span>
+<span id="cb3-12"><a href="#cb3-12"></a>}</span>
+<span id="cb3-13"><a href="#cb3-13"></a></span>
+<span id="cb3-14"><a href="#cb3-14"></a><span class="co"># setup four threads</span></span>
+<span id="cb3-15"><a href="#cb3-15"></a><span class="fu">plan</span>(multisession, <span class="at">workers =</span> <span class="dv">4</span>)</span>
+<span id="cb3-16"><a href="#cb3-16"></a></span>
+<span id="cb3-17"><a href="#cb3-17"></a><span class="co"># fit models in parallel</span></span>
+<span id="cb3-18"><a href="#cb3-18"></a>div_scores <span class="ot">&lt;-</span> n <span class="sc">%&gt;%</span> </span>
+<span id="cb3-19"><a href="#cb3-19"></a>  <span class="fu">future_map_dbl</span>(</span>
+<span id="cb3-20"><a href="#cb3-20"></a>    <span class="sc">~</span><span class="fu">get_div_score</span>(unigram_dfm, <span class="at">k =</span> .x),</span>
+<span id="cb3-21"><a href="#cb3-21"></a>    <span class="fu">furrr_options</span>(<span class="at">seed =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb3-22"><a href="#cb3-22"></a></span>
+<span id="cb3-23"><a href="#cb3-23"></a><span class="co"># assemble a df with number of topics and divergence scores</span></span>
+<span id="cb3-24"><a href="#cb3-24"></a>div_score_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb3-25"><a href="#cb3-25"></a>  <span class="at">num_topics =</span> n,</span>
+<span id="cb3-26"><a href="#cb3-26"></a>  <span class="at">div_score =</span> div_scores</span>
+<span id="cb3-27"><a href="#cb3-27"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+
+</div>
+<section id="finding-the-maximum-divergence-the-quantitative-part" class="level3">
+<h3 class="anchored" data-anchor-id="finding-the-maximum-divergence-the-quantitative-part">Finding the maximum divergence – the quantitative part</h3>
+<p>Here’s the code to create the number of topics vs.&nbsp;divergence plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a><span class="co"># plot topic number vs divergence score</span></span>
+<span id="cb4-2"><a href="#cb4-2"></a>div_score_df <span class="sc">%&gt;%</span> </span>
+<span id="cb4-3"><a href="#cb4-3"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> num_topics, <span class="at">y =</span> div_score)) <span class="sc">+</span></span>
+<span id="cb4-4"><a href="#cb4-4"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb4-5"><a href="#cb4-5"></a>  <span class="fu">ylab</span>(<span class="st">"Divergence Score"</span>) <span class="sc">+</span></span>
+<span id="cb4-6"><a href="#cb4-6"></a>  <span class="fu">xlab</span>(<span class="st">"Number of Topics"</span>) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7"></a>  <span class="fu">geom_hline</span>(<span class="at">yintercept =</span> <span class="fu">max</span>(div_score_df<span class="sc">$</span>div_score), </span>
+<span id="cb4-8"><a href="#cb4-8"></a>             <span class="at">color =</span> <span class="st">"blue"</span>, </span>
+<span id="cb4-9"><a href="#cb4-9"></a>             <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span></span>
+<span id="cb4-10"><a href="#cb4-10"></a>  <span class="fu">annotate</span>(<span class="st">"text"</span>, </span>
+<span id="cb4-11"><a href="#cb4-11"></a>           <span class="at">x=</span><span class="dv">30</span>, </span>
+<span id="cb4-12"><a href="#cb4-12"></a>           <span class="at">y=</span><span class="fu">max</span>(div_score_df<span class="sc">$</span>div_score)<span class="sc">+</span><span class="fl">0.01</span>, </span>
+<span id="cb4-13"><a href="#cb4-13"></a>           <span class="at">label=</span><span class="st">"0.436"</span>,</span>
+<span id="cb4-14"><a href="#cb4-14"></a>           <span class="at">color =</span> <span class="st">"blue"</span>) <span class="sc">+</span></span>
+<span id="cb4-15"><a href="#cb4-15"></a>  <span class="fu">ggtitle</span>(<span class="st">"Number of Topics vs Divergence"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="gc_topic_model_best_fit_files/figure-html/unnamed-chunk-4-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>In the end, it was easier to just view the top three results in a table.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>div_score_df <span class="sc">%&gt;%</span> </span>
+<span id="cb5-2"><a href="#cb5-2"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(div_score)) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="#cb5-3"></a>  <span class="fu">head</span>(<span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 2
+  num_topics div_score
+       &lt;dbl&gt;     &lt;dbl&gt;
+1         30     0.436
+2         32     0.435
+3         28     0.434
+4         24     0.433
+5         26     0.433</code></pre>
+</div>
+</div>
+</section>
+<section id="interpreting-the-topics-the-qualitative-part" class="level3">
+<h3 class="anchored" data-anchor-id="interpreting-the-topics-the-qualitative-part">Interpreting the topics – the qualitative part</h3>
+<p>While the 30-topic model has the highest divergence, maximal divergence does not necessarily mean that that number of topics is maximally meaningful. So I took the models with the top three divergence scores (32-topic, 30-topic, and 28-topics) and explored the quality of the topics.</p>
+<p>I created these models in parallel on my server. Here’s the code:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a>n <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">28</span>, <span class="dv">30</span>, <span class="dv">32</span>)</span>
+<span id="cb7-2"><a href="#cb7-2"></a></span>
+<span id="cb7-3"><a href="#cb7-3"></a><span class="fu">plan</span>(multisession, <span class="at">workers =</span> <span class="dv">3</span>)</span>
+<span id="cb7-4"><a href="#cb7-4"></a>lda_fits <span class="ot">&lt;-</span> n <span class="sc">%&gt;%</span> </span>
+<span id="cb7-5"><a href="#cb7-5"></a>  <span class="fu">future_map</span>(</span>
+<span id="cb7-6"><a href="#cb7-6"></a>    <span class="sc">~</span><span class="fu">textmodel_lda</span>(unigram_dfm, <span class="at">k =</span> .x),</span>
+<span id="cb7-7"><a href="#cb7-7"></a>    <span class="fu">furrr_options</span>(<span class="at">seed =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>After the 28-, 30-, and 32-topics models were fit, I created labels for each topic based on the words that the topic was composed of to evaluate the topic quality. Here I’ll demonstrate this process with the 30- and 32-topic models.</p>
+<p>I extracted the words per topic with the <code>terms()</code> function and formed them into a tibble for ease of reading. Then I proceeded to subjectively interpret the topics based on the top 10 words in each topic. I don’t believe there is a way to avoid this. Notice that I updated the column names with meaningful labels.</p>
+<p>It is expected that there will be some noisy topics. If the topic wasn’t clear to me, I labeled it with question marks.</p>
+<div class="cell">
+
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a><span class="fu">library</span>(knitr) </span>
+<span id="cb8-2"><a href="#cb8-2"></a></span>
+<span id="cb8-3"><a href="#cb8-3"></a>lda30_df <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(<span class="fu">terms</span>(lda_fits[[<span class="dv">2</span>]]))</span>
+<span id="cb8-4"><a href="#cb8-4"></a></span>
+<span id="cb8-5"><a href="#cb8-5"></a><span class="fu">names</span>(lda30_df) <span class="ot">&lt;-</span> </span>
+<span id="cb8-6"><a href="#cb8-6"></a>  <span class="fu">c</span>(<span class="st">"01_Lost_Sheep"</span>,</span>
+<span id="cb8-7"><a href="#cb8-7"></a>    <span class="st">"02_Jesus_Christ_Savior"</span>, </span>
+<span id="cb8-8"><a href="#cb8-8"></a>    <span class="st">"03_Priesthood_Leaders_Responsibility"</span>,</span>
+<span id="cb8-9"><a href="#cb8-9"></a>    <span class="st">"04_Spiritual_Light_of_the_World"</span>,</span>
+<span id="cb8-10"><a href="#cb8-10"></a>    <span class="st">"05_Gospel_Scripture_Study"</span>,</span>
+<span id="cb8-11"><a href="#cb8-11"></a>    <span class="st">"06_Sins_Repentace_Atonement"</span>, </span>
+<span id="cb8-12"><a href="#cb8-12"></a>    <span class="st">"07_Lords_People_Zion??"</span>,</span>
+<span id="cb8-13"><a href="#cb8-13"></a>    <span class="st">"08_Missionary_Service"</span>,</span>
+<span id="cb8-14"><a href="#cb8-14"></a>    <span class="st">"09_Joseph_Smith"</span>,</span>
+<span id="cb8-15"><a href="#cb8-15"></a>    <span class="st">"10_Church_Welfare_Fast_Offerings"</span>,</span>
+<span id="cb8-16"><a href="#cb8-16"></a>    <span class="st">"11_???"</span>,</span>
+<span id="cb8-17"><a href="#cb8-17"></a>    <span class="st">"12_Book_of_Mormon_Scripture_Reading"</span>,</span>
+<span id="cb8-18"><a href="#cb8-18"></a>    <span class="st">"13_???"</span>,</span>
+<span id="cb8-19"><a href="#cb8-19"></a>    <span class="st">"14_Priesthood_Power_Keys"</span>,</span>
+<span id="cb8-20"><a href="#cb8-20"></a>    <span class="st">"15_Sustain_Church_Officers"</span>,</span>
+<span id="cb8-21"><a href="#cb8-21"></a>    <span class="st">"16_Holy_Ghost_Testimony"</span>,</span>
+<span id="cb8-22"><a href="#cb8-22"></a>    <span class="st">"17_Love_of_God_Jesus_Christ"</span>,</span>
+<span id="cb8-23"><a href="#cb8-23"></a>    <span class="st">"18_Prayer"</span>,</span>
+<span id="cb8-24"><a href="#cb8-24"></a>    <span class="st">"19_Time_to_Choose_Eternal_Life"</span>,</span>
+<span id="cb8-25"><a href="#cb8-25"></a>    <span class="st">"20_Relief_Society"</span>,</span>
+<span id="cb8-26"><a href="#cb8-26"></a>    <span class="st">"21_Sacrament_Sabbath_Day"</span>,</span>
+<span id="cb8-27"><a href="#cb8-27"></a>    <span class="st">"22_Temple_Covenants_Blessings"</span>,</span>
+<span id="cb8-28"><a href="#cb8-28"></a>    <span class="st">"23_Gods_Plan_Eternal_Life"</span>,</span>
+<span id="cb8-29"><a href="#cb8-29"></a>    <span class="st">"24_???"</span>,</span>
+<span id="cb8-30"><a href="#cb8-30"></a>    <span class="st">"25_Morals_Standards??"</span>,</span>
+<span id="cb8-31"><a href="#cb8-31"></a>    <span class="st">"26_Faith_in_Jesus_Christ"</span>,</span>
+<span id="cb8-32"><a href="#cb8-32"></a>    <span class="st">"27_??"</span>, </span>
+<span id="cb8-33"><a href="#cb8-33"></a>    <span class="st">"28_Prophet_President"</span>,</span>
+<span id="cb8-34"><a href="#cb8-34"></a>    <span class="st">"29_???"</span>,</span>
+<span id="cb8-35"><a href="#cb8-35"></a>    <span class="st">"30_Family_Home"</span></span>
+<span id="cb8-36"><a href="#cb8-36"></a>    )</span>
+<span id="cb8-37"><a href="#cb8-37"></a></span>
+<span id="cb8-38"><a href="#cb8-38"></a><span class="fu">kable</span>(lda30_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<colgroup>
+<col style="width: 2%">
+<col style="width: 3%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 2%">
+<col style="width: 4%">
+<col style="width: 1%">
+<col style="width: 5%">
+<col style="width: 1%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 1%">
+<col style="width: 4%">
+<col style="width: 2%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 1%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 1%">
+<col style="width: 3%">
+<col style="width: 1%">
+<col style="width: 2%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">01_Lost_Sheep</th>
+<th style="text-align: left;">02_Jesus_Christ_Savior</th>
+<th style="text-align: left;">03_Priesthood_Leaders_Responsibility</th>
+<th style="text-align: left;">04_Spiritual_Light_of_the_World</th>
+<th style="text-align: left;">05_Gospel_Scripture_Study</th>
+<th style="text-align: left;">06_Sins_Repentace_Atonement</th>
+<th style="text-align: left;">07_Lords_People_Zion??</th>
+<th style="text-align: left;">08_Missionary_Service</th>
+<th style="text-align: left;">09_Joseph_Smith</th>
+<th style="text-align: left;">10_Church_Welfare_Fast_Offerings</th>
+<th style="text-align: left;">11_???</th>
+<th style="text-align: left;">12_Book_of_Mormon_Scripture_Reading</th>
+<th style="text-align: left;">13_???</th>
+<th style="text-align: left;">14_Priesthood_Power_Keys</th>
+<th style="text-align: left;">15_Sustain_Church_Officers</th>
+<th style="text-align: left;">16_Holy_Ghost_Testimony</th>
+<th style="text-align: left;">17_Love_of_God_Jesus_Christ</th>
+<th style="text-align: left;">18_Prayer</th>
+<th style="text-align: left;">19_Time_to_Choose_Eternal_Life</th>
+<th style="text-align: left;">20_Relief_Society</th>
+<th style="text-align: left;">21_Sacrament_Sabbath_Day</th>
+<th style="text-align: left;">22_Temple_Covenants_Blessings</th>
+<th style="text-align: left;">23_Gods_Plan_Eternal_Life</th>
+<th style="text-align: left;">24_???</th>
+<th style="text-align: left;">25_Morals_Standards??</th>
+<th style="text-align: left;">26_Faith_in_Jesus_Christ</th>
+<th style="text-align: left;">27_??</th>
+<th style="text-align: left;">28_Prophet_President</th>
+<th style="text-align: left;">29_???</th>
+<th style="text-align: left;">30_Family_Home</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">sheep</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">light</td>
+<td style="text-align: left;">gospel</td>
+<td style="text-align: left;">repentance</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">mission</td>
+<td style="text-align: left;">joseph</td>
+<td style="text-align: left;">welfare</td>
+<td style="text-align: left;">alma</td>
+<td style="text-align: left;">book</td>
+<td style="text-align: left;">brother</td>
+<td style="text-align: left;">priesthood</td>
+<td style="text-align: left;">manifest</td>
+<td style="text-align: left;">holy</td>
+<td style="text-align: left;">love</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">women</td>
+<td style="text-align: left;">sacrament</td>
+<td style="text-align: left;">temple</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">faith</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">children</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">water</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">priesthood</td>
+<td style="text-align: left;">peace</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">sins</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">missionaries</td>
+<td style="text-align: left;">smith</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">ne</td>
+<td style="text-align: left;">mormon</td>
+<td style="text-align: left;">home</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">presidency</td>
+<td style="text-align: left;">spirit</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">prayer</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">society</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">covenants</td>
+<td style="text-align: left;">eternal</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">evil</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">don’t</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">thy</td>
+<td style="text-align: left;">family</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">king</td>
+<td style="text-align: left;">son</td>
+<td style="text-align: left;">bishop</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">learn</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">missionary</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">poor</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">read</td>
+<td style="text-align: left;">mother</td>
+<td style="text-align: left;">power</td>
+<td style="text-align: left;">sustain</td>
+<td style="text-align: left;">ghost</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">heavenly</td>
+<td style="text-align: left;">path</td>
+<td style="text-align: left;">relief</td>
+<td style="text-align: left;">remember</td>
+<td style="text-align: left;">blessings</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">thou</td>
+<td style="text-align: left;">home</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">quorum</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">teach</td>
+<td style="text-align: left;">atonement</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">gospel</td>
+<td style="text-align: left;">prophet</td>
+<td style="text-align: left;">services</td>
+<td style="text-align: left;">mosiah</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">hand</td>
+<td style="text-align: left;">authority</td>
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">happiness</td>
+<td style="text-align: left;">sisters</td>
+<td style="text-align: left;">sabbath</td>
+<td style="text-align: left;">covenant</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">conference</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">prophet</td>
+<td style="text-align: left;">ye</td>
+<td style="text-align: left;">parents</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">lost</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">stake</td>
+<td style="text-align: left;">darkness</td>
+<td style="text-align: left;">principles</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">earth</td>
+<td style="text-align: left;">serve</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">scriptures</td>
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">brethren</td>
+<td style="text-align: left;">favor</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">savior</td>
+<td style="text-align: left;">pray</td>
+<td style="text-align: left;">hope</td>
+<td style="text-align: left;">woman</td>
+<td style="text-align: left;">sacrifice</td>
+<td style="text-align: left;">ordinances</td>
+<td style="text-align: left;">plan</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">boy</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">families</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">john</td>
+<td style="text-align: left;">ward</td>
+<td style="text-align: left;">spiritual</td>
+<td style="text-align: left;">taught</td>
+<td style="text-align: left;">sin</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">tithing</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">aaronic</td>
+<td style="text-align: left;">twelve</td>
+<td style="text-align: left;">testimony</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">love</td>
+<td style="text-align: left;">lives</td>
+<td style="text-align: left;">sister</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">family</td>
+<td style="text-align: left;">earth</td>
+<td style="text-align: left;">saints</td>
+<td style="text-align: left;">moral</td>
+<td style="text-align: left;">testimony</td>
+<td style="text-align: left;">home</td>
+<td style="text-align: left;">conference</td>
+<td style="text-align: left;">thee</td>
+<td style="text-align: left;">love</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;">repent</td>
+<td style="text-align: left;">land</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">fast</td>
+<td style="text-align: left;">ye</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">words</td>
+<td style="text-align: left;">keys</td>
+<td style="text-align: left;">proposed</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">eternal</td>
+<td style="text-align: left;">daughters</td>
+<td style="text-align: left;">sunday</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">temple</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">power</td>
+<td style="text-align: left;">told</td>
+<td style="text-align: left;">kimball</td>
+<td style="text-align: left;">shalt</td>
+<td style="text-align: left;">marriage</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">david</td>
+<td style="text-align: left;">death</td>
+<td style="text-align: left;">leaders</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">spiritual</td>
+<td style="text-align: left;">savior</td>
+<td style="text-align: left;">zion</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">gospel</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">patience</td>
+<td style="text-align: left;">words</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">hold</td>
+<td style="text-align: left;">quorum</td>
+<td style="text-align: left;">receive</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">feel</td>
+<td style="text-align: left;">choose</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">meeting</td>
+<td style="text-align: left;">sacred</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">building</td>
+<td style="text-align: left;">satan</td>
+<td style="text-align: left;">lives</td>
+<td style="text-align: left;">school</td>
+<td style="text-align: left;">prophets</td>
+<td style="text-align: left;">commandments</td>
+<td style="text-align: left;">mother</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">shepherd</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">home</td>
+<td style="text-align: left;">gospel</td>
+<td style="text-align: left;">scriptures</td>
+<td style="text-align: left;">mercy</td>
+<td style="text-align: left;">nations</td>
+<td style="text-align: left;">service</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">family</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">nephi</td>
+<td style="text-align: left;">found</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">gift</td>
+<td style="text-align: left;">gospel</td>
+<td style="text-align: left;">son</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">music</td>
+<td style="text-align: left;">receive</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">standards</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">hinckley</td>
+<td style="text-align: left;">matt</td>
+<td style="text-align: left;">father</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">savior</td>
+<td style="text-align: left;">responsibility</td>
+<td style="text-align: left;">truth</td>
+<td style="text-align: left;">doctrine</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">elder</td>
+<td style="text-align: left;">earth</td>
+<td style="text-align: left;">food</td>
+<td style="text-align: left;">heart</td>
+<td style="text-align: left;">word</td>
+<td style="text-align: left;">ago</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">counselor</td>
+<td style="text-align: left;">power</td>
+<td style="text-align: left;">sisters</td>
+<td style="text-align: left;">heart</td>
+<td style="text-align: left;">follow</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">sacred</td>
+<td style="text-align: left;">temples</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">sisters</td>
+<td style="text-align: left;">live</td>
+<td style="text-align: left;">gospel</td>
+<td style="text-align: left;">love</td>
+<td style="text-align: left;">called</td>
+<td style="text-align: left;">words</td>
+<td style="text-align: left;">wife</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>lda32_df <span class="ot">&lt;-</span> <span class="fu">as_tibble</span>(<span class="fu">terms</span>(lda_fits[[<span class="dv">1</span>]]))</span>
+<span id="cb9-2"><a href="#cb9-2"></a></span>
+<span id="cb9-3"><a href="#cb9-3"></a><span class="fu">names</span>(lda32_df) <span class="ot">&lt;-</span> </span>
+<span id="cb9-4"><a href="#cb9-4"></a>  <span class="fu">c</span>(<span class="st">"01_Sustain_Church_Officers"</span>,</span>
+<span id="cb9-5"><a href="#cb9-5"></a>    <span class="st">"02_Repentence"</span>,</span>
+<span id="cb9-6"><a href="#cb9-6"></a>    <span class="st">"03_Church_Audit_Financial"</span>,</span>
+<span id="cb9-7"><a href="#cb9-7"></a>    <span class="st">"04_Gospel_Scripture_Study"</span>,</span>
+<span id="cb9-8"><a href="#cb9-8"></a>    <span class="st">"05_Jesus_Christ_Resurrection"</span>,</span>
+<span id="cb9-9"><a href="#cb9-9"></a>    <span class="st">"06_Spiritual_Light_of_the_World"</span>,</span>
+<span id="cb9-10"><a href="#cb9-10"></a>    <span class="st">"07_???"</span>,</span>
+<span id="cb9-11"><a href="#cb9-11"></a>    <span class="st">"08_???"</span>,</span>
+<span id="cb9-12"><a href="#cb9-12"></a>    <span class="st">"09_Prophet_President"</span>,</span>
+<span id="cb9-13"><a href="#cb9-13"></a>    <span class="st">"10_Tithing"</span>,</span>
+<span id="cb9-14"><a href="#cb9-14"></a>    <span class="st">"11_Standards_Against_Evil??"</span>,</span>
+<span id="cb9-15"><a href="#cb9-15"></a>    <span class="st">"12_Priesthood_Power_Keys"</span>,</span>
+<span id="cb9-16"><a href="#cb9-16"></a>    <span class="st">"13_Conference???"</span>,</span>
+<span id="cb9-17"><a href="#cb9-17"></a>    <span class="st">"14_Book_of_Mormon_Joseph_Smith"</span>,</span>
+<span id="cb9-18"><a href="#cb9-18"></a>    <span class="st">"15_Holy_Ghost_Prayer_Testimony"</span>,</span>
+<span id="cb9-19"><a href="#cb9-19"></a>    <span class="st">"16_Marriage_Family"</span>,</span>
+<span id="cb9-20"><a href="#cb9-20"></a>    <span class="st">"17_Church_Leaders"</span>,</span>
+<span id="cb9-21"><a href="#cb9-21"></a>    <span class="st">"18_Church_Welfare_Fast_Offerings"</span>,</span>
+<span id="cb9-22"><a href="#cb9-22"></a>    <span class="st">"19_Gods_Plan_Eternal_Life"</span>,</span>
+<span id="cb9-23"><a href="#cb9-23"></a>    <span class="st">"20_Covenants"</span>,</span>
+<span id="cb9-24"><a href="#cb9-24"></a>    <span class="st">"21_Joy_Suffering_Faith"</span>,</span>
+<span id="cb9-25"><a href="#cb9-25"></a>    <span class="st">"22_Tree_of_Life_Path???"</span>,</span>
+<span id="cb9-26"><a href="#cb9-26"></a>    <span class="st">"23_Missionary_Service"</span>,</span>
+<span id="cb9-27"><a href="#cb9-27"></a>    <span class="st">"24_Church_of_Jesus_Christ"</span>,</span>
+<span id="cb9-28"><a href="#cb9-28"></a>    <span class="st">"25_Faith_in_Jesus_Christ"</span>,</span>
+<span id="cb9-29"><a href="#cb9-29"></a>    <span class="st">"26_Temple_Ordinances"</span>,</span>
+<span id="cb9-30"><a href="#cb9-30"></a>    <span class="st">"27_Lords_People???"</span>,</span>
+<span id="cb9-31"><a href="#cb9-31"></a>    <span class="st">"28_Love_Jesus_Christ"</span>,  </span>
+<span id="cb9-32"><a href="#cb9-32"></a>    <span class="st">"29_???"</span>, <span class="co"># I think this is my garbage topic</span></span>
+<span id="cb9-33"><a href="#cb9-33"></a>    <span class="st">"30_Relief_Society_Women"</span>,</span>
+<span id="cb9-34"><a href="#cb9-34"></a>    <span class="st">"31_Family_Home"</span>,</span>
+<span id="cb9-35"><a href="#cb9-35"></a>    <span class="st">"32_???"</span> <span class="co"># I think this is a garbage topic too</span></span>
+<span id="cb9-36"><a href="#cb9-36"></a>    )</span>
+<span id="cb9-37"><a href="#cb9-37"></a></span>
+<span id="cb9-38"><a href="#cb9-38"></a><span class="fu">kable</span>(lda32_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<colgroup>
+<col style="width: 3%">
+<col style="width: 2%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 1%">
+<col style="width: 1%">
+<col style="width: 3%">
+<col style="width: 1%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 2%">
+<col style="width: 4%">
+<col style="width: 4%">
+<col style="width: 2%">
+<col style="width: 2%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 1%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 3%">
+<col style="width: 2%">
+<col style="width: 3%">
+<col style="width: 1%">
+<col style="width: 3%">
+<col style="width: 2%">
+<col style="width: 1%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">01_Sustain_Church_Officers</th>
+<th style="text-align: left;">02_Repentence</th>
+<th style="text-align: left;">03_Church_Audit_Financial</th>
+<th style="text-align: left;">04_Gospel_Scripture_Study</th>
+<th style="text-align: left;">05_Jesus_Christ_Resurrection</th>
+<th style="text-align: left;">06_Spiritual_Light_of_the_World</th>
+<th style="text-align: left;">07_???</th>
+<th style="text-align: left;">08_???</th>
+<th style="text-align: left;">09_Prophet_President</th>
+<th style="text-align: left;">10_Tithing</th>
+<th style="text-align: left;">11_Standards_Against_Evil??</th>
+<th style="text-align: left;">12_Priesthood_Power_Keys</th>
+<th style="text-align: left;">13_Conference???</th>
+<th style="text-align: left;">14_Book_of_Mormon_Joseph_Smith</th>
+<th style="text-align: left;">15_Holy_Ghost_Prayer_Testimony</th>
+<th style="text-align: left;">16_Marriage_Family</th>
+<th style="text-align: left;">17_Church_Leaders</th>
+<th style="text-align: left;">18_Church_Welfare_Fast_Offerings</th>
+<th style="text-align: left;">19_Gods_Plan_Eternal_Life</th>
+<th style="text-align: left;">20_Covenants</th>
+<th style="text-align: left;">21_Joy_Suffering_Faith</th>
+<th style="text-align: left;">22_Tree_of_Life_Path???</th>
+<th style="text-align: left;">23_Missionary_Service</th>
+<th style="text-align: left;">24_Church_of_Jesus_Christ</th>
+<th style="text-align: left;">25_Faith_in_Jesus_Christ</th>
+<th style="text-align: left;">26_Temple_Ordinances</th>
+<th style="text-align: left;">27_Lords_People???</th>
+<th style="text-align: left;">28_Love_Jesus_Christ</th>
+<th style="text-align: left;">29_???</th>
+<th style="text-align: left;">30_Relief_Society_Women</th>
+<th style="text-align: left;">31_Family_Home</th>
+<th style="text-align: left;">32_???</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">manifest</td>
+<td style="text-align: left;">alma</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">gospel</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">light</td>
+<td style="text-align: left;">king</td>
+<td style="text-align: left;">brother</td>
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">evil</td>
+<td style="text-align: left;">priesthood</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">book</td>
+<td style="text-align: left;">holy</td>
+<td style="text-align: left;">marriage</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">welfare</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">covenants</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">mission</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">faith</td>
+<td style="text-align: left;">temple</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">love</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">women</td>
+<td style="text-align: left;">children</td>
+<td style="text-align: left;">thou</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">presidency</td>
+<td style="text-align: left;">sins</td>
+<td style="text-align: left;">program</td>
+<td style="text-align: left;">scriptures</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">darkness</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">home</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">tithing</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">power</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">mormon</td>
+<td style="text-align: left;">spirit</td>
+<td style="text-align: left;">love</td>
+<td style="text-align: left;">bishop</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">covenant</td>
+<td style="text-align: left;">joy</td>
+<td style="text-align: left;">water</td>
+<td style="text-align: left;">missionaries</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">family</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">don’t</td>
+<td style="text-align: left;">society</td>
+<td style="text-align: left;">family</td>
+<td style="text-align: left;">thy</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sustain</td>
+<td style="text-align: left;">repentance</td>
+<td style="text-align: left;">department</td>
+<td style="text-align: left;">learn</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">ne</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">mother</td>
+<td style="text-align: left;">prophet</td>
+<td style="text-align: left;">pay</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">conference</td>
+<td style="text-align: left;">joseph</td>
+<td style="text-align: left;">ghost</td>
+<td style="text-align: left;">wife</td>
+<td style="text-align: left;">quorum</td>
+<td style="text-align: left;">poor</td>
+<td style="text-align: left;">eternal</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">suffering</td>
+<td style="text-align: left;">journey</td>
+<td style="text-align: left;">missionary</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">peace</td>
+<td style="text-align: left;">temples</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">relief</td>
+<td style="text-align: left;">home</td>
+<td style="text-align: left;">lord</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">auditing</td>
+<td style="text-align: left;">study</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">courage</td>
+<td style="text-align: left;">hand</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">sacrifice</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">brethren</td>
+<td style="text-align: left;">saints</td>
+<td style="text-align: left;">smith</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">ward</td>
+<td style="text-align: left;">services</td>
+<td style="text-align: left;">plan</td>
+<td style="text-align: left;">sacrament</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">path</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">hope</td>
+<td style="text-align: left;">ordinances</td>
+<td style="text-align: left;">earth</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">sisters</td>
+<td style="text-align: left;">parents</td>
+<td style="text-align: left;">ye</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">favor</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">membership</td>
+<td style="text-align: left;">spiritual</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">israel</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">money</td>
+<td style="text-align: left;">standards</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">salt</td>
+<td style="text-align: left;">prophet</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">stake</td>
+<td style="text-align: left;">fast</td>
+<td style="text-align: left;">commandments</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">tree</td>
+<td style="text-align: left;">serve</td>
+<td style="text-align: left;">gospel</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">savior</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">woman</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">god</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">proposed</td>
+<td style="text-align: left;">sin</td>
+<td style="text-align: left;">funds</td>
+<td style="text-align: left;">teach</td>
+<td style="text-align: left;">son</td>
+<td style="text-align: left;">spiritual</td>
+<td style="text-align: left;">david</td>
+<td style="text-align: left;">words</td>
+<td style="text-align: left;">joseph</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">moral</td>
+<td style="text-align: left;">authority</td>
+<td style="text-align: left;">city</td>
+<td style="text-align: left;">read</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">children</td>
+<td style="text-align: left;">home</td>
+<td style="text-align: left;">program</td>
+<td style="text-align: left;">happiness</td>
+<td style="text-align: left;">holy</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">gospel</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">house</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">didn’t</td>
+<td style="text-align: left;">sister</td>
+<td style="text-align: left;">families</td>
+<td style="text-align: left;">thee</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">quorum</td>
+<td style="text-align: left;">repent</td>
+<td style="text-align: left;">education</td>
+<td style="text-align: left;">taught</td>
+<td style="text-align: left;">death</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">stand</td>
+<td style="text-align: left;">ago</td>
+<td style="text-align: left;">conference</td>
+<td style="text-align: left;">blessings</td>
+<td style="text-align: left;">satan</td>
+<td style="text-align: left;">aaronic</td>
+<td style="text-align: left;">lake</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">prayer</td>
+<td style="text-align: left;">family</td>
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">father</td>
+<td style="text-align: left;">blessings</td>
+<td style="text-align: left;">faith</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">service</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">blessings</td>
+<td style="text-align: left;">land</td>
+<td style="text-align: left;">sisters</td>
+<td style="text-align: left;">school</td>
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">love</td>
+<td style="text-align: left;">jesus</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">twelve</td>
+<td style="text-align: left;">ye</td>
+<td style="text-align: left;">council</td>
+<td style="text-align: left;">word</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">daniel</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">smith</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">youth</td>
+<td style="text-align: left;">keys</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">god</td>
+<td style="text-align: left;">pray</td>
+<td style="text-align: left;">husband</td>
+<td style="text-align: left;">leaders</td>
+<td style="text-align: left;">principles</td>
+<td style="text-align: left;">choose</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">pain</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">truth</td>
+<td style="text-align: left;">power</td>
+<td style="text-align: left;">sacred</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">heavenly</td>
+<td style="text-align: left;">boy</td>
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">teach</td>
+<td style="text-align: left;">shalt</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">counselor</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">financial</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">resurrection</td>
+<td style="text-align: left;">christ</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">president</td>
+<td style="text-align: left;">kimball</td>
+<td style="text-align: left;">people</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">hold</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">jesus</td>
+<td style="text-align: left;">words</td>
+<td style="text-align: left;">eternal</td>
+<td style="text-align: left;">priesthood</td>
+<td style="text-align: left;">food</td>
+<td style="text-align: left;">heavenly</td>
+<td style="text-align: left;">sacred</td>
+<td style="text-align: left;">healing</td>
+<td style="text-align: left;">follow</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">earth</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">dead</td>
+<td style="text-align: left;">nations</td>
+<td style="text-align: left;">feel</td>
+<td style="text-align: left;">remember</td>
+<td style="text-align: left;">daughters</td>
+<td style="text-align: left;">mother</td>
+<td style="text-align: left;">matt</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">church</td>
+<td style="text-align: left;">atonement</td>
+<td style="text-align: left;">percent</td>
+<td style="text-align: left;">principles</td>
+<td style="text-align: left;">earth</td>
+<td style="text-align: left;">truth</td>
+<td style="text-align: left;">hand</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">prophets</td>
+<td style="text-align: left;">life</td>
+<td style="text-align: left;">clean</td>
+<td style="text-align: left;">duty</td>
+<td style="text-align: left;">world</td>
+<td style="text-align: left;">lord</td>
+<td style="text-align: left;">testimony</td>
+<td style="text-align: left;">woman</td>
+<td style="text-align: left;">teachers</td>
+<td style="text-align: left;">family</td>
+<td style="text-align: left;">god’s</td>
+<td style="text-align: left;">remember</td>
+<td style="text-align: left;">trials</td>
+<td style="text-align: left;">day</td>
+<td style="text-align: left;">elder</td>
+<td style="text-align: left;">true</td>
+<td style="text-align: left;">lives</td>
+<td style="text-align: left;">time</td>
+<td style="text-align: left;">days</td>
+<td style="text-align: left;">heart</td>
+<td style="text-align: left;">friends</td>
+<td style="text-align: left;">mother</td>
+<td style="text-align: left;">child</td>
+<td style="text-align: left;">love</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<p><br></p>
+<section id="battle-30-topic-vs-32-topic" class="level4">
+<h4 class="anchored" data-anchor-id="battle-30-topic-vs-32-topic">Battle: 30-topic vs 32-topic</h4>
+<p>To wrap my mind around the pros and cons of the two models. I captured some of the differences in this table.</p>
+<blockquote class="blockquote">
+<p>This is where contextual knowledge of the data is needed.</p>
+</blockquote>
+<table class="table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">30-Topic Model</th>
+<th style="text-align: left;">32-Topic Model</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;"><strong>Book of Mormon</strong> gets paired with <em>scriptures and scripture reading</em>. <strong>Joseph Smith</strong> has his own topic.</td>
+<td style="text-align: left;"><strong>Book of Mormon</strong> gets paired with <em>joseph smith</em></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><strong>Prayer</strong> has its own topic.</td>
+<td style="text-align: left;"><em>prayer</em> gets placed inside the <strong>The Holy Ghost</strong> and <strong>Testimony</strong> topic.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><strong>Jesus Christ</strong> is paired with <em>savior</em></td>
+<td style="text-align: left;"><strong>Jesus Christ</strong> is paired with <em>resurrection</em>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Seems to have a <strong>Lost Sheep</strong> topic.</td>
+<td style="text-align: left;">There is not topic that contains <em>sheep</em>.</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;"><em>sacrament</em> is paired with <em>sabbath day</em> (topic #21)</td>
+<td style="text-align: left;"><em>sacrament</em> is paired with <em>covenants</em>.</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"><em>tithing</em> is found under the <strong>Church Welfare</strong> topic.</td>
+<td style="text-align: left;"><em>tithing</em> is paired with <em>sacrifice</em> and <em>pay</em>, which seems to solidly form a <strong>Tithing</strong> topic</td>
+</tr>
+</tbody>
+</table>
+<p>I like the fact that Joseph Smith has his own topic in the 30-topic model; and, it probably makes more sense to bundle the Book of Mormon with scriptures (since it is part of the scriptural canon of The Church of Jesus Christ of Latter-day Saints) than it does with Joseph Smith (who translated it). A strong nudge to favor the 30-topic model.</p>
+<p>Prayer and Christ’s direction to find and feed His “lost sheep” are both very common topics in GC talks. The 30-topic has separate topics for each of these. That’s a couple of votes for the 30-topic model.</p>
+<p>I especially like that the Jesus Christ topic contains <em>savior</em>. I prefer that associate as Savior over the associate with <em>resurrection</em> in the 32-topic model. I view His resurrection as part of His saving.</p>
+<p>Members of the Church meet together on Sundays (the Sabbath day) to partake of the Sacrament (i.e., the Lord’s Supper), so it’s very appropriate to associate the Sacrament with the Sabbath day. However, the Sacrament is a time for church members to remember the covenants they made at baptism; so it’s equally appropriate to associate the Sacrament with covenants as well. So, this point is a wash.</p>
+<p>Tithing as its own topic (in the 32-topic model) is appealing. A win for the 32-topic model. However, tithing is often spoken of in the context of fast offerings. Fast offerings are free-will monetary offerings given in conjunction with a fast – the money saved from skipping meals during the fast is donated to help the poor and needy. A counter for the 30-topic model. But the 32-topic option highlights tithing in terms of sacrifice. You might consider tithing as a baseline measure of an individual’s willingness to sacrifice for the Lord. A stronger counter for the 32-topic model.</p>
+<p>So, overall, we’ll go with the 30-topic model.</p>
+<blockquote class="blockquote">
+<p>As I explored models with more topics, I discovered that other topics crystalized, examples include youth and the latter days, home teaching (a program to ensure members of the church are taken care of and watched over), pioneers and trek to Salt Lake City, and revelation.</p>
+</blockquote>
+<p>Let’s pull out the 30-topic model.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>lda30_fit <span class="ot">&lt;-</span> lda_fits[[<span class="dv">2</span>]]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="exploring-results" class="level2">
+<h2 class="anchored" data-anchor-id="exploring-results">Exploring results</h2>
+<p>Now that we have a finalized topic model, let’s look at the results.</p>
+<p>First, I’ll use the LDA model to predict the topic of each of the talks. To do this, I’ll use <code>topics(lda30_fit)</code>. That returns a named list, like this:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="fu">head</span>(<span class="fu">topics</span>(lda30_fit))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>       1971_04_a_witness_and_a_blessing 1971_04_all_may_share_in_adams_blessing 
+                                 topic9                                 topic22 
+               1971_04_be_slow_to_anger             1971_04_choose_you_this_day 
+                                 topic4                                  topic7 
+        1971_04_drink_of_the_pure_water   1971_04_eternal_joy_is_eternal_growth 
+                                topic26                                 topic23 
+30 Levels: topic1 topic2 topic3 topic4 topic5 topic6 topic7 topic8 ... topic30</code></pre>
+</div>
+</div>
+<p>So, I assemble a data frame with the doc_ids and the topic_ids.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a><span class="fu">library</span>(lubridate)</span>
+<span id="cb13-2"><a href="#cb13-2"></a></span>
+<span id="cb13-3"><a href="#cb13-3"></a><span class="co"># assemble doc_ids and topics</span></span>
+<span id="cb13-4"><a href="#cb13-4"></a>talk_topics_df <span class="ot">&lt;-</span> </span>
+<span id="cb13-5"><a href="#cb13-5"></a>  <span class="fu">tibble</span>(</span>
+<span id="cb13-6"><a href="#cb13-6"></a>    <span class="at">doc_id =</span> <span class="fu">names</span>(<span class="fu">topics</span>(lda30_fit)),</span>
+<span id="cb13-7"><a href="#cb13-7"></a>    <span class="at">topic_id =</span> <span class="fu">topics</span>(lda30_fit)) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-8"><a href="#cb13-8"></a>  <span class="fu">mutate</span>(<span class="at">conf_date =</span> <span class="fu">str_sub</span>(doc_id, <span class="dv">1</span>, <span class="dv">7</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb13-9"><a href="#cb13-9"></a>           <span class="fu">str_replace</span>(<span class="st">"_"</span>, <span class="st">"-"</span>) <span class="sc">%&gt;%</span>  <span class="fu">ym</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Since the topic_ids are not very helpful, I’ll combine them with the topic labels I created above and join them into the talk data frame.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a><span class="co"># create a topic label map, to get more meaningful labels</span></span>
+<span id="cb14-2"><a href="#cb14-2"></a>topic_df <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb14-3"><a href="#cb14-3"></a>  <span class="at">topic_id =</span> <span class="fu">str_c</span>(<span class="st">"topic"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">30</span>),</span>
+<span id="cb14-4"><a href="#cb14-4"></a>  <span class="at">topic_label =</span> <span class="fu">str_sub</span>(<span class="fu">names</span>(lda30_df), <span class="dv">4</span>))</span>
+<span id="cb14-5"><a href="#cb14-5"></a></span>
+<span id="cb14-6"><a href="#cb14-6"></a><span class="co"># join topic labels in</span></span>
+<span id="cb14-7"><a href="#cb14-7"></a>talk_topics_df <span class="ot">&lt;-</span> </span>
+<span id="cb14-8"><a href="#cb14-8"></a>  talk_topics_df <span class="sc">%&gt;%</span> <span class="fu">left_join</span>(topic_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>I’d like to explore the number of talks at each conference over time, so I’ll aggregate the topic counts for each conference.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a><span class="co"># get topic counts in each conference</span></span>
+<span id="cb15-2"><a href="#cb15-2"></a>conf_topic_counts_df <span class="ot">&lt;-</span> </span>
+<span id="cb15-3"><a href="#cb15-3"></a>  talk_topics_df <span class="sc">%&gt;%</span> </span>
+<span id="cb15-4"><a href="#cb15-4"></a>  <span class="fu">count</span>(conf_date, topic_label)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now, we are ready to plot. I did quite a bit of exploration and came across this plot. I found it interesting that the “Love_of_God_Jesus_Christ” topic has become more prevalent since about 2010.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a>conf_topic_counts_df <span class="sc">%&gt;%</span> </span>
+<span id="cb16-2"><a href="#cb16-2"></a>  <span class="fu">filter</span>(topic_label <span class="sc">==</span> <span class="st">"Love_of_God_Jesus_Christ"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb16-3"><a href="#cb16-3"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x=</span>conf_date, <span class="at">y=</span>n)) <span class="sc">+</span></span>
+<span id="cb16-4"><a href="#cb16-4"></a>  <span class="fu">geom_col</span>(<span class="at">fill =</span> <span class="st">"purple"</span>) <span class="sc">+</span></span>
+<span id="cb16-5"><a href="#cb16-5"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img src="gc_topic_model_best_fit_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid" width="672"></p>
+</div>
+</div>
+<p>Here is a list of the top 20 words in the Love_of_God_Jesus_Christ topic (it was topic 17).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="fu">terms</span>(lda30_fit, <span class="dv">20</span>)[, <span class="dv">17</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "love"     "christ"   "jesus"    "church"   "savior"   "god"     
+ [7] "day"      "life"     "gospel"   "sisters"  "brothers" "people"  
+[13] "lives"    "heart"    "serve"    "service"  "world"    "children"
+[19] "follow"   "feel"    </code></pre>
+</div>
+</div>
+</section>
+<section id="conclusion" class="level1">
+<h1>Conclusion</h1>
+<p>So, topic modeling isn’t perfect. But, like an impressionist painting, it gives a clearer picture of the categories found in a large corpus.</p>
+
+
+</section>
+
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Thanks to <a href="https://juliasilge.com/">Julia Silge</a> and contributors for making the tidytext package and for authoring <a href="https://www.tidytextmining.com/">Text Mining with R</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p><a href="https://hal.archives-ouvertes.fr/hal-01002716/document">Romain Deveaud, Eric Sanjuan, Patrice Bellot. Accurate and Effective Latent Concept Modeling for Ad Hoc Information Retrieval. Document numérique- Revue des sciences et technologies de l’information. Série Document numérique, 2014, pp.61-84.</a><a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

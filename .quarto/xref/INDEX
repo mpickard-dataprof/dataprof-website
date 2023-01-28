@@ -40,5 +40,8 @@
   },
   "blog/dataprep/simple-low-variance-feature-selection-mask-in-r.qmd": {
     "simple-low-variance-feature-selection-mask-in-r.html": "8cd078c5"
+  },
+  "blog/nlp/gc_topic_model_best_fit.qmd": {
+    "gc_topic_model_best_fit.html": "4402f0a3"
   }
 }
