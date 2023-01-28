@@ -4,6 +4,7 @@ listing:
   contents: 
     - blog/dataprep
     - blog/machinelearn
+    - blog/nlp
   sort: "date desc"
   type: default
   categories: true
