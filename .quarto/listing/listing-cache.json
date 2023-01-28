@@ -7,7 +7,8 @@
       "posts",
       "blog/posts",
       "blog/dataprep",
-      "blog/machinelearn"
+      "blog/machinelearn",
+      "blog/nlp"
     ]
   }
 }

@@ -53,7 +53,7 @@
     "href": "blog.html",
     "title": "Blog",
     "section": "",
-    "text": "Simple Feature Selection Using a Low-to-No Variance Mask\n\n\n\n\n\n\n\n\n\n\nDemonstrates how to remove features with low to no variance.\n\n\n\n\n\n\nJan 5, 2023\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\nregex to Preserve Currency Tokens\n\n\n\n\n\n\n\nregex\n\n\ndata preparation\n\n\npython\n\n\nr\n\n\n\n\nDevelopment of a regex to preserve currency values in the U.S. Tax Code.\n\n\n\n\n\n\nMar 14, 2022\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\nUsing xgboost and sklearn to Predict Loan Default\n\n\n\n\n\n\n\npython\n\n\nmachine learning\n\n\n\n\n\n\n\n\n\n\n\nMar 1, 2022\n\n\nMatt Pickard\n\n\n\n\n\n\nNo matching items"
+    "text": "seededlda Topic Model - Finding the best fit\n\n\n\n\n\n\n\ntopic modeling\n\n\nnlp\n\n\nmultithread\n\n\n\n\n\n\n\n\n\n\n\nJan 24, 2023\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\nSimple Feature Selection Using a Low-to-No Variance Mask\n\n\n\n\n\n\n\n\n\n\nDemonstrates how to remove features with low to no variance.\n\n\n\n\n\n\nJan 5, 2023\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\nregex to Preserve Currency Tokens\n\n\n\n\n\n\n\nregex\n\n\ndata preparation\n\n\npython\n\n\nr\n\n\n\n\nDevelopment of a regex to preserve currency values in the U.S. Tax Code.\n\n\n\n\n\n\nMar 14, 2022\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\nUsing xgboost and sklearn to Predict Loan Default\n\n\n\n\n\n\n\npython\n\n\nmachine learning\n\n\n\n\n\n\n\n\n\n\n\nMar 1, 2022\n\n\nMatt Pickard\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "projects.html",
