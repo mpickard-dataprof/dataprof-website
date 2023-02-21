@@ -219,7 +219,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
       <div>
       <div class="quarto-title-meta-heading">Modified</div>
       <div class="quarto-title-meta-contents">
-        <p class="date-modified">January 6, 2023</p>
+        <p class="date-modified">February 21, 2023</p>
       </div>
     </div>
       
@@ -249,7 +249,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 
 <section id="introduction" class="level1">
 <h1>Introduction</h1>
-<p>I’ve been working to collect a corpus of tax legislation, regulations, and court cases. At the core of my corpus is the United States Code Title 26 (USC26), otherwise known as the Internal Revenue Code or the U.S. Tax Code. I’m using the corpus to train a tax-specific word embedding. Word embeddings capture similarity semantics of tokens (words, or multi-word phrases) by encoding them into a n-dimensional space. Similar tokens are embedded into the n-dimensional space in close proximity.</p>
+<p>I’ve been working to collect a corpus of tax legislation, regulations, and court cases. At the core of my corpus is the United States Code Title 26 (USC26), otherwise known as the Internal Revenue Code or the U.S. Tax Code. I’m using the corpus to train a tax-specific word embedding. Word embeddings capture similarity semantics of tokens (words, or multi-word phrases) by encoding them into an n-dimensional space. Similar tokens are embedded into the n-dimensional space in close proximity.</p>
 <p>Since currency values may have important semantic meaning in the USC–for instance, tax bracket boundaries–I want to preserve them so the tokenizer does not break them apart. To do this, I want to replace spaces, commas, decimals, and dollar signs with underscores. Here are some examples:</p>
 <table class="table">
 <caption>Examples of Currency Values</caption>
@@ -378,7 +378,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb9-8"><a href="#cb9-8"></a></span>
 <span id="cb9-9"><a href="#cb9-9"></a><span class="bu">print</span>(<span class="st">"elapsed ms = "</span>, (end_ms<span class="op">-</span>start_ms)<span class="op">/</span><span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>elapsed ms =  0.02</code></pre>
+<pre><code>elapsed ms =  0.031</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -387,10 +387,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb11-3"><a href="#cb11-3"></a>microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(<span class="fu">str_replace_all</span>(test_string, pattern, replace_currency_parts), <span class="at">times =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Unit: milliseconds
-                                                          expr    min      lq
- str_replace_all(test_string, pattern, replace_currency_parts) 1.8425 1.91115
-     mean median      uq     max neval
- 2.003461 1.9451 2.00055 10.2409  1000</code></pre>
+                                                          expr    min     lq
+ str_replace_all(test_string, pattern, replace_currency_parts) 4.1608 4.5206
+     mean median     uq     max neval
+ 5.057107 4.7471 5.2982 11.7094  1000</code></pre>
 </div>
 </div>
 <p>I don’t know what overhead is included in the {stringr} package, but it’s about two orders of magnitude slower than Python. I suspect it is because the Python <code>replace()</code> string method is quite speedy.</p>
@@ -531,6 +531,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     }
   }
 });
+</script>
+<script src="https://giscus.app/client.js" data-repo="mpickard-dataprof/dataprof-website" data-repo-id="R_kgDOIt1A1Q" data-category="General" data-category-id="DIC_kwDOIt1A1c4CUVbk" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
 </script>
 </div> <!-- /content -->
 

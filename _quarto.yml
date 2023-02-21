@@ -28,9 +28,5 @@ format:
     code-block-border-left: true
   
 
-# enable comments
-comments:
-  giscus: 
-    repo: mpickard-dataprof/dataprof-website
 
 
