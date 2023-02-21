@@ -11,4 +11,9 @@ author: 'Matt Pickard'
 
 warning: false
 
+=======
+# enable comments
+comments:
+  giscus: 
+    repo: mpickard-dataprof/dataprof-website
 
