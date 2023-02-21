@@ -378,7 +378,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb9-8"><a href="#cb9-8"></a></span>
 <span id="cb9-9"><a href="#cb9-9"></a><span class="bu">print</span>(<span class="st">"elapsed ms = "</span>, (end_ms<span class="op">-</span>start_ms)<span class="op">/</span><span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>elapsed ms =  0.031</code></pre>
+<pre><code>elapsed ms =  0.03</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -387,10 +387,10 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <span id="cb11-3"><a href="#cb11-3"></a>microbenchmark<span class="sc">::</span><span class="fu">microbenchmark</span>(<span class="fu">str_replace_all</span>(test_string, pattern, replace_currency_parts), <span class="at">times =</span> <span class="dv">1000</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Unit: milliseconds
-                                                          expr    min     lq
- str_replace_all(test_string, pattern, replace_currency_parts) 4.1608 4.5206
-     mean median     uq     max neval
- 5.057107 4.7471 5.2982 11.7094  1000</code></pre>
+                                                          expr    min      lq
+ str_replace_all(test_string, pattern, replace_currency_parts) 3.9244 4.33575
+     mean  median     uq    max neval
+ 4.716089 4.52625 4.8115 9.4067  1000</code></pre>
 </div>
 </div>
 <p>I don’t know what overhead is included in the {stringr} package, but it’s about two orders of magnitude slower than Python. I suspect it is because the Python <code>replace()</code> string method is quite speedy.</p>
