@@ -70,9 +70,9 @@ ul.task-list li input[type="checkbox"] {
     }
 
     const options = {
-      valueNames: ['listing-date','listing-title','listing-author','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
+      valueNames: ['listing-date','listing-title','listing-author','listing-image','listing-description','listing-categories',{ data: ['index'] },{ data: ['categories'] },{ data: ['listing-date-sort'] },{ data: ['listing-file-modified-sort'] }],
       
-      searchColumns: ["listing-date","listing-title","listing-author","listing-description","listing-categories"],
+      searchColumns: ["listing-date","listing-title","listing-author","listing-image","listing-description","listing-categories"],
     };
 
     window['quarto-listings'] = window['quarto-listings'] || {};
@@ -152,7 +152,7 @@ ul.task-list li input[type="checkbox"] {
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         
-    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(4)</span></div><div class="category" data-category="data preparation">data preparation <span class="quarto-category-count">(1)</span></div><div class="category" data-category="machine learning">machine learning <span class="quarto-category-count">(1)</span></div><div class="category" data-category="multithread">multithread <span class="quarto-category-count">(1)</span></div><div class="category" data-category="nlp">nlp <span class="quarto-category-count">(1)</span></div><div class="category" data-category="python">python <span class="quarto-category-count">(2)</span></div><div class="category" data-category="r">r <span class="quarto-category-count">(1)</span></div><div class="category" data-category="regex">regex <span class="quarto-category-count">(1)</span></div><div class="category" data-category="topic modeling">topic modeling <span class="quarto-category-count">(1)</span></div></div></div>
+    <h5 class="quarto-listing-category-title">Categories</h5><div class="quarto-listing-category category-default"><div class="category" data-category="">All <span class="quarto-category-count">(5)</span></div><div class="category" data-category="aggregation">aggregation <span class="quarto-category-count">(1)</span></div><div class="category" data-category="conditional aggregation">conditional aggregation <span class="quarto-category-count">(1)</span></div><div class="category" data-category="data preparation">data preparation <span class="quarto-category-count">(1)</span></div><div class="category" data-category="excel">excel <span class="quarto-category-count">(1)</span></div><div class="category" data-category="machine learning">machine learning <span class="quarto-category-count">(1)</span></div><div class="category" data-category="multithread">multithread <span class="quarto-category-count">(1)</span></div><div class="category" data-category="nlp">nlp <span class="quarto-category-count">(1)</span></div><div class="category" data-category="python">python <span class="quarto-category-count">(2)</span></div><div class="category" data-category="r">r <span class="quarto-category-count">(1)</span></div><div class="category" data-category="regex">regex <span class="quarto-category-count">(1)</span></div><div class="category" data-category="summarization">summarization <span class="quarto-category-count">(1)</span></div><div class="category" data-category="topic modeling">topic modeling <span class="quarto-category-count">(1)</span></div></div></div>
 <!-- main -->
 <main class="content column-page-left" id="quarto-document-content">
 
@@ -179,7 +179,58 @@ ul.task-list li input[type="checkbox"] {
 
 <div class="quarto-listing quarto-listing-container-default" id="listing-listing">
 <div class="list quarto-listing-default">
-<div class="quarto-post image-right" data-index="0" data-categories="topic modeling,nlp,multithread" data-listing-date-sort="1674540000000" data-listing-file-modified-sort="1674931272453" data-listing-reading-time-sort="15.325">
+<div class="quarto-post image-right" data-index="0" data-categories="excel,aggregation,conditional aggregation,summarization" data-listing-date-sort="1676959200000" data-listing-file-modified-sort="1677001192167" data-listing-reading-time-sort="0.79">
+<div class="thumbnail">
+<p><a href="./blog/dataprep/excel_conditional_aggregation.html"> <img src="./blog/dataprep/images/countifs_demo.png" class="thumnail-image"> </a></p>
+</div>
+<div class="body">
+<a href="./blog/dataprep/excel_conditional_aggregation.html">
+<h3 class="no-anchor listing-title">
+Excel Conditional Aggregation Functions (COUNTIFS, SUMIFS, AVERAGEIFS)
+</h3>
+<div class="listing-subtitle">
+
+</div>
+</a>
+<div class="listing-categories">
+<div class="listing-category" onclick="window.quartoListingCategory('excel'); return false;">
+excel
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('aggregation'); return false;">
+aggregation
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('conditional aggregation'); return false;">
+conditional aggregation
+</div>
+<div class="listing-category" onclick="window.quartoListingCategory('summarization'); return false;">
+summarization
+</div>
+</div>
+<a href="./blog/dataprep/excel_conditional_aggregation.html">
+<div class="listing-description">
+<p>Data aggregation involves combing multiple data points into a single number. This post shows how to use Excel to aggregate rows of data that meet certain conditions.</p>
+</div>
+</a>
+</div>
+<div class="metadata">
+<a href="./blog/dataprep/excel_conditional_aggregation.html">
+<div class="listing-date">
+Feb 21, 2023
+</div>
+<div class="listing-author">
+Matt Pickard
+</div>
+</a>
+</div>
+</div>
+<div class="quarto-post image-right" data-index="1" data-categories="topic modeling,nlp,multithread" data-listing-date-sort="1674540000000" data-listing-file-modified-sort="1674931272453" data-listing-reading-time-sort="15.325">
+<div class="thumbnail">
+<a href="./blog/nlp/gc_topic_model_best_fit.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./blog/nlp/gc_topic_model_best_fit.html"></a></p>
+</div>
 <div class="body">
 <a href="./blog/nlp/gc_topic_model_best_fit.html">
 <h3 class="no-anchor listing-title">
@@ -217,7 +268,14 @@ Matt Pickard
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="1" data-categories="" data-listing-date-sort="1672898400000" data-listing-file-modified-sort="1673567320955" data-listing-reading-time-sort="4.845">
+<div class="quarto-post image-right" data-index="2" data-categories="" data-listing-date-sort="1672898400000" data-listing-file-modified-sort="1673567320955" data-listing-reading-time-sort="4.845">
+<div class="thumbnail">
+<a href="./blog/dataprep/simple-low-variance-feature-selection-mask-in-r.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./blog/dataprep/simple-low-variance-feature-selection-mask-in-r.html"></a></p>
+</div>
 <div class="body">
 <a href="./blog/dataprep/simple-low-variance-feature-selection-mask-in-r.html">
 <h3 class="no-anchor listing-title">
@@ -247,7 +305,14 @@ Matt Pickard
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="2" data-categories="regex,data preparation,python,r" data-listing-date-sort="1647234000000" data-listing-file-modified-sort="1676996514193" data-listing-reading-time-sort="4.03">
+<div class="quarto-post image-right" data-index="3" data-categories="regex,data preparation,python,r" data-listing-date-sort="1647234000000" data-listing-file-modified-sort="1676996514193" data-listing-reading-time-sort="4.03">
+<div class="thumbnail">
+<a href="./blog/dataprep/regex-preserve_currency_tokens.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./blog/dataprep/regex-preserve_currency_tokens.html"></a></p>
+</div>
 <div class="body">
 <a href="./blog/dataprep/regex-preserve_currency_tokens.html">
 <h3 class="no-anchor listing-title">
@@ -288,7 +353,14 @@ Matt Pickard
 </a>
 </div>
 </div>
-<div class="quarto-post image-right" data-index="3" data-categories="python,machine learning" data-listing-date-sort="1646114400000" data-listing-file-modified-sort="1673026062927" data-listing-reading-time-sort="3.26">
+<div class="quarto-post image-right" data-index="4" data-categories="python,machine learning" data-listing-date-sort="1646114400000" data-listing-file-modified-sort="1673026062927" data-listing-reading-time-sort="3.26">
+<div class="thumbnail">
+<a href="./blog/machinelearn/using-xgboost-and-sklearn-to-predict-loan-default.html">
+<div class="thumbnail-image">
+
+</div>
+</a><p><a href="./blog/machinelearn/using-xgboost-and-sklearn-to-predict-loan-default.html"></a></p>
+</div>
 <div class="body">
 <a href="./blog/machinelearn/using-xgboost-and-sklearn-to-predict-loan-default.html">
 <h3 class="no-anchor listing-title">

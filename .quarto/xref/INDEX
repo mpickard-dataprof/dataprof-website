@@ -46,5 +46,8 @@
   },
   "blog/dataprep/test.qmd": {
     "test.html": "01775b02"
+  },
+  "blog/dataprep/excel_conditional_aggregation.qmd": {
+    "excel_conditional_aggregation.html": "c82abc33"
   }
 }

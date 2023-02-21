@@ -53,7 +53,7 @@
     "href": "blog.html",
     "title": "Blog",
     "section": "",
-    "text": "seededlda Topic Model - Finding the best fit\n\n\n\n\n\n\n\ntopic modeling\n\n\nnlp\n\n\nmultithread\n\n\n\n\n\n\n\n\n\n\n\nJan 24, 2023\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\nSimple Feature Selection Using a Low-to-No Variance Mask\n\n\n\n\n\n\n\n\n\n\nDemonstrates how to remove features with low to no variance.\n\n\n\n\n\n\nJan 5, 2023\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\nregex to Preserve Currency Tokens\n\n\n\n\n\n\n\nregex\n\n\ndata preparation\n\n\npython\n\n\nr\n\n\n\n\nDevelopment of a regex to preserve currency values in the U.S. Tax Code.\n\n\n\n\n\n\nMar 14, 2022\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\nUsing xgboost and sklearn to Predict Loan Default\n\n\n\n\n\n\n\npython\n\n\nmachine learning\n\n\n\n\n\n\n\n\n\n\n\nMar 1, 2022\n\n\nMatt Pickard\n\n\n\n\n\n\nNo matching items"
+    "text": "Excel Conditional Aggregation Functions (COUNTIFS, SUMIFS, AVERAGEIFS)\n\n\n\n\n\n\n\nexcel\n\n\naggregation\n\n\nconditional aggregation\n\n\nsummarization\n\n\n\n\nData aggregation involves combing multiple data points into a single number. This post shows how to use Excel to aggregate rows of data that meet certain conditions.\n\n\n\n\n\n\nFeb 21, 2023\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nseededlda Topic Model - Finding the best fit\n\n\n\n\n\n\n\ntopic modeling\n\n\nnlp\n\n\nmultithread\n\n\n\n\n\n\n\n\n\n\n\nJan 24, 2023\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nSimple Feature Selection Using a Low-to-No Variance Mask\n\n\n\n\n\n\n\n\n\n\nDemonstrates how to remove features with low to no variance.\n\n\n\n\n\n\nJan 5, 2023\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nregex to Preserve Currency Tokens\n\n\n\n\n\n\n\nregex\n\n\ndata preparation\n\n\npython\n\n\nr\n\n\n\n\nDevelopment of a regex to preserve currency values in the U.S. Tax Code.\n\n\n\n\n\n\nMar 14, 2022\n\n\nMatt Pickard\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nUsing xgboost and sklearn to Predict Loan Default\n\n\n\n\n\n\n\npython\n\n\nmachine learning\n\n\n\n\n\n\n\n\n\n\n\nMar 1, 2022\n\n\nMatt Pickard\n\n\n\n\n\n\nNo matching items"
   },
   {
     "objectID": "projects.html",
@@ -229,5 +229,19 @@
     "title": "test",
     "section": "",
     "text": "Test\n\n1 + 1\n\n[1] 2"
+  },
+  {
+    "objectID": "blog/dataprep/excel_conditional_aggregation.html",
+    "href": "blog/dataprep/excel_conditional_aggregation.html",
+    "title": "Excel Conditional Aggregation Functions (COUNTIFS, SUMIFS, AVERAGEIFS)",
+    "section": "",
+    "text": "Data aggregation is the process of combining multiple data points into a single number. It’s synonymous with summarization. In this post, we’ll review how to use aggregation functions in Excel – specifically, the conditional aggregation functions (e.g., COUNTIFS(), SUMIFS(), and AVERAGEIFS())."
+  },
+  {
+    "objectID": "blog/dataprep/excel_conditional_aggregation.html#example-of-countifs",
+    "href": "blog/dataprep/excel_conditional_aggregation.html#example-of-countifs",
+    "title": "Excel Conditional Aggregation Functions (COUNTIFS, SUMIFS, AVERAGEIFS)",
+    "section": "Example of COUNTIFS()",
+    "text": "Example of COUNTIFS()\nThe COUNT function family is the simplest. We’ll demonstrate an example here.\n\n\n\nExample of the COUNTIFS Excel function\n\n\nNotice the formula in G1, takes pairs of arguments – criteria_range and criteria. Here we count only rows that meet two conditions:\n\nProduct = “Pants” – B2:B10 is the criteria_range1, in other words, that’s the range of cells we are going to check to see if they are equal to “Pants” (which is the criteria).\nColor = “Tan” – C2:C10 is the range of color values to check (criteria_range2) and “Tan” is the criteria.\n\nSo we only include products where the Color is “Tan” (and the Product is “Pants”) in the count.\nThis video shows more details."
   }
 ]
