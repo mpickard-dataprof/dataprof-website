@@ -1,11 +1,6 @@
 {
   "listingMap": {
-    "index.qmd": [
-      "posts"
-    ],
     "blog.qmd": [
-      "posts",
-      "blog/posts",
       "blog/dataprep",
       "blog/machinelearn",
       "blog/nlp"

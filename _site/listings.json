@@ -1,12 +1,5 @@
 [
   {
-    "listing": "/index.html",
-    "items": [
-      "/posts/regex-preserve_currency_tokens/index.html",
-      "/posts/using-xgboost-and-sklearn-to-predict-loan-default/index.html"
-    ]
-  },
-  {
     "listing": "/blog.html",
     "items": [
       "/blog/dataprep/excel_conditional_aggregation.html",
