@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Matt Pickard">
+<meta name="dcterms.date" content="2023-01-05">
+<meta name="description" content="Demonstrates how to remove features with low to no variance.">
+
+<title>The Data Professor - Simple Feature Selection Using a Low-to-No Variance Mask</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="../../../site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="../../../site_libs/quarto-nav/headroom.min.js"></script>
+<script src="../../../site_libs/clipboard/clipboard.min.js"></script>
+<script src="../../../site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="../../../site_libs/quarto-search/fuse.min.js"></script>
+<script src="../../../site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="../../../">
+<script src="../../../site_libs/quarto-html/quarto.js"></script>
+<script src="../../../site_libs/quarto-html/popper.min.js"></script>
+<script src="../../../site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="../../../site_libs/quarto-html/anchor.min.js"></script>
+<link href="../../../site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="../../../site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="../../../site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="../../../site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="../../../site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=G-1MRJJ9SWFC"></script>
+
+<script type="text/javascript">
+
+window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-1MRJJ9SWFC', { 'anonymize_ip': true});
+</script>
+
+
+<link rel="stylesheet" href="../../../styles.css">
+</head>
+
+<body class="nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="../../../index.html">
+    <span class="navbar-title">The Data Professor</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../blog.html">
+ <span class="menu-text">Blog</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="../../../projects.html">
+ <span class="menu-text">Projects</span></a>
+  </li>  
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="../../../about.html">
+ <span class="menu-text">About</span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/mpickard-dataprof"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://www.linkedin.com/in/mattpickard/"><i class="bi bi-linked" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://twitter.com/matt_d_pickard"><i class="bi bi-twitter" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+</header>
+<!-- content -->
+<header id="title-block-header" class="quarto-title-block default page-columns page-full">
+  <div class="quarto-title-banner page-columns page-full">
+    <div class="quarto-title column-body">
+      <h1 class="title">Simple Feature Selection Using a Low-to-No Variance Mask</h1>
+                  <div>
+        <div class="description">
+          Demonstrates how to remove features with low to no variance.
+        </div>
+      </div>
+                </div>
+  </div>
+    
+  
+  <div class="quarto-title-meta">
+
+      <div>
+      <div class="quarto-title-meta-heading">Author</div>
+      <div class="quarto-title-meta-contents">
+               <p>Matt Pickard </p>
+            </div>
+    </div>
+      
+      <div>
+      <div class="quarto-title-meta-heading">Published</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date">January 5, 2023</p>
+      </div>
+    </div>
+    
+      <div>
+      <div class="quarto-title-meta-heading">Modified</div>
+      <div class="quarto-title-meta-contents">
+        <p class="date-modified">September 1, 2023</p>
+      </div>
+    </div>
+      
+    </div>
+    
+  
+  </header><div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction">Introduction</a>
+  <ul class="collapse">
+  <li><a href="#why-is-variance-important-in-feature-selection" id="toc-why-is-variance-important-in-feature-selection" class="nav-link" data-scroll-target="#why-is-variance-important-in-feature-selection">Why is variance important in feature selection?</a></li>
+  </ul></li>
+  <li><a href="#a-manual-method" id="toc-a-manual-method" class="nav-link" data-scroll-target="#a-manual-method">A manual method</a>
+  <ul class="collapse">
+  <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setup</a></li>
+  <li><a href="#calculate-feature-variances" id="toc-calculate-feature-variances" class="nav-link" data-scroll-target="#calculate-feature-variances">Calculate feature variances</a></li>
+  <li><a href="#set-variance-threshold-and-create-a-mask" id="toc-set-variance-threshold-and-create-a-mask" class="nav-link" data-scroll-target="#set-variance-threshold-and-create-a-mask">Set variance threshold and create a mask</a></li>
+  <li><a href="#apply-the-mask" id="toc-apply-the-mask" class="nav-link" data-scroll-target="#apply-the-mask">Apply the mask</a></li>
+  </ul></li>
+  <li><a href="#a-better-way-tidymodels" id="toc-a-better-way-tidymodels" class="nav-link" data-scroll-target="#a-better-way-tidymodels">A better way – <code>tidymodels</code></a>
+  <ul class="collapse">
+  <li><a href="#load-data-with-categorical-variables" id="toc-load-data-with-categorical-variables" class="nav-link" data-scroll-target="#load-data-with-categorical-variables">Load data with categorical variables</a></li>
+  <li><a href="#define-a-recipe-object" id="toc-define-a-recipe-object" class="nav-link" data-scroll-target="#define-a-recipe-object">Define a recipe object</a></li>
+  <li><a href="#apply-the-recipe-to-credit_df" id="toc-apply-the-recipe-to-credit_df" class="nav-link" data-scroll-target="#apply-the-recipe-to-credit_df">Apply the recipe to <code>credit_df</code></a></li>
+  </ul></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content quarto-banner-title-block" id="quarto-document-content">
+
+
+
+
+<section id="introduction" class="level1">
+<h1>Introduction</h1>
+<p>One way to perform dimensionality reduction is through feature selection. In this post, we’ll explore how to create a low-variance feature mask (or filter). We’ll cover both a manual approach with <code>dplyr</code> functions and a more automated, production approach with <code>recipes</code> functions. Enjoy!</p>
+<section id="why-is-variance-important-in-feature-selection" class="level2">
+<h2 class="anchored" data-anchor-id="why-is-variance-important-in-feature-selection">Why is variance important in feature selection?</h2>
+<p>Variance is important in feature selection because of a concept called information gain. <em>Information gain</em> is what we know about one (usually unknown) variable because we can observe another known variable. In supervised learning, we use information from predictor variables to learn something about the target variable.</p>
+<p>To make this concrete, imagine we want to estimate loan applicants’ creditworthiness. Though we don’t have their credit scores, we do have their monthly income, age, and number of outstanding loans. If every applicant in our data set has three outstanding loans – that is, the number of outstanding loans didn’t vary – then “outstanding loans” does not differentiate loan applicants and, therefore, does not provide any information about the applicants that we can use to estimate their creditworthiness. Therefore, we’d say that number of outstanding loans provides no information gain about creditworthiness.</p>
+<p>We can remove features with little to no variance because they are not informative. Consider them useless fluff.</p>
+</section>
+</section>
+<section id="a-manual-method" class="level1">
+<h1>A manual method</h1>
+<p>We’ll start by creating a low-variance filter manually with <code>dplyr</code> functions.</p>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<p>For this example, we’ll use a <a href="https://www.kaggle.com/datasets/parisrohan/credit-score-classification">credit score classification</a> data set from Kaggle, provided by <a href="https://www.kaggle.com/datasets/parisrohan/credit-score-classification">Rohan Paris</a>. The data set is large, so I randomly sampled 20% of it. I also did a little data cleaning. As you’ll see, to make this exercise interesting, we’ll add a few low-variance features to demonstrate feature removal.</p>
+<p>You can download the cleaned data set <a href="data/credit_data.csv" download="">here</a>.</p>
+<p>Since variance is conceptually simpler with continuous variables, let’s only load the continuous variables into <code>credit_df</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2"></a><span class="fu">library</span>(knitr)</span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a>credit_df <span class="ot">&lt;-</span> </span>
+<span id="cb1-5"><a href="#cb1-5"></a>  <span class="fu">read_csv</span>(<span class="st">"data/credit_data.csv"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb1-6"><a href="#cb1-6"></a>  <span class="fu">select_if</span>(is.numeric)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here’s a peek at the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="fu">kable</span>(credit_df <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<colgroup>
+<col style="width: 1%">
+<col style="width: 4%">
+<col style="width: 7%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 3%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 6%">
+<col style="width: 5%">
+<col style="width: 8%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 5%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">age</th>
+<th style="text-align: right;">annual_income</th>
+<th style="text-align: right;">monthly_inhand_salary</th>
+<th style="text-align: right;">num_bank_accounts</th>
+<th style="text-align: right;">num_credit_card</th>
+<th style="text-align: right;">interest_rate</th>
+<th style="text-align: right;">num_of_loan</th>
+<th style="text-align: right;">delay_from_due_date</th>
+<th style="text-align: right;">num_of_delayed_payment</th>
+<th style="text-align: right;">changed_credit_limit</th>
+<th style="text-align: right;">num_credit_inquiries</th>
+<th style="text-align: right;">outstanding_debt</th>
+<th style="text-align: right;">credit_utilization_ratio</th>
+<th style="text-align: right;">total_emi_per_month</th>
+<th style="text-align: right;">amount_invested_monthly</th>
+<th style="text-align: right;">monthly_balance</th>
+<th style="text-align: right;">credit_history_months</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">41</td>
+<td style="text-align: right;">16176.83</td>
+<td style="text-align: right;">1585.070</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">2445</td>
+<td style="text-align: right;">1200.70</td>
+<td style="text-align: right;">29.94733</td>
+<td style="text-align: right;">21.96219</td>
+<td style="text-align: right;">38.32601</td>
+<td style="text-align: right;">358.2188</td>
+<td style="text-align: right;">241</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">36</td>
+<td style="text-align: right;">82383.04</td>
+<td style="text-align: right;">6661.253</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">1.71</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1218.57</td>
+<td style="text-align: right;">33.38963</td>
+<td style="text-align: right;">162.10896</td>
+<td style="text-align: right;">123.97997</td>
+<td style="text-align: right;">630.0364</td>
+<td style="text-align: right;">392</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">44</td>
+<td style="text-align: right;">28805.34</td>
+<td style="text-align: right;">2309.445</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">7.02</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">796.45</td>
+<td style="text-align: right;">26.83209</td>
+<td style="text-align: right;">47.19512</td>
+<td style="text-align: right;">139.90769</td>
+<td style="text-align: right;">303.8417</td>
+<td style="text-align: right;">385</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">45412.95</td>
+<td style="text-align: right;">3520.412</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">23.07</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">4601.39</td>
+<td style="text-align: right;">23.41958</td>
+<td style="text-align: right;">113.69155</td>
+<td style="text-align: right;">199.56341</td>
+<td style="text-align: right;">318.7863</td>
+<td style="text-align: right;">55</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">45</td>
+<td style="text-align: right;">17296.38</td>
+<td style="text-align: right;">1480.365</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">17.34</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">4624.73</td>
+<td style="text-align: right;">38.39057</td>
+<td style="text-align: right;">49.36071</td>
+<td style="text-align: right;">78.16123</td>
+<td style="text-align: right;">280.5146</td>
+<td style="text-align: right;">92</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="calculate-feature-variances" class="level2">
+<h2 class="anchored" data-anchor-id="calculate-feature-variances">Calculate feature variances</h2>
+<p>To begin, let’s calculate the variance of each column. With <code>dplyr</code>, we’ll use <code>across()</code> to apply <code>var()</code> to all columns with the <code>everything()</code> selector. Notice that we <code>scale()</code> the data before passing it to <code>var()</code>. It is important to normalize the data so the features are comparable with each other. Unnormalized, <code>num_credit_card</code> and <code>monthly income</code>, have very different variances. To compare their influence on creditworthiness in a fair manner, we normalize them.</p>
+<p>We use <code>tidyr</code>’s <code>pivot_longer()</code> to pivot the scaled variances to columns. We’ll sort them from largest to smallest.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a>credit_df <span class="sc">%&gt;%</span> </span>
+<span id="cb3-2"><a href="#cb3-2"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb3-3"><a href="#cb3-3"></a>    <span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">var</span>(<span class="fu">scale</span>(., <span class="at">center =</span> <span class="cn">FALSE</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>))) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 17
+  age[,1] annual_income[,1] monthly_inhand_salary[,1] num_bank_accounts[,1]
+    &lt;dbl&gt;             &lt;dbl&gt;                     &lt;dbl&gt;                 &lt;dbl&gt;
+1  0.0787             0.974                     0.353                 0.978
+# ℹ 13 more variables: num_credit_card &lt;dbl[,1]&gt;, interest_rate &lt;dbl[,1]&gt;,
+#   num_of_loan &lt;dbl[,1]&gt;, delay_from_due_date &lt;dbl[,1]&gt;,
+#   num_of_delayed_payment &lt;dbl[,1]&gt;, changed_credit_limit &lt;dbl[,1]&gt;,
+#   num_credit_inquiries &lt;dbl[,1]&gt;, outstanding_debt &lt;dbl[,1]&gt;,
+#   credit_utilization_ratio &lt;dbl[,1]&gt;, total_emi_per_month &lt;dbl[,1]&gt;,
+#   amount_invested_monthly &lt;dbl[,1]&gt;, monthly_balance &lt;dbl[,1]&gt;,
+#   credit_history_months &lt;dbl[,1]&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>credit_variances <span class="ot">&lt;-</span> credit_df <span class="sc">%&gt;%</span> </span>
+<span id="cb5-2"><a href="#cb5-2"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb5-3"><a href="#cb5-3"></a>    <span class="fu">across</span>(</span>
+<span id="cb5-4"><a href="#cb5-4"></a>        <span class="fu">everything</span>(), </span>
+<span id="cb5-5"><a href="#cb5-5"></a>        <span class="sc">~</span> <span class="fu">var</span>(<span class="fu">scale</span>(., <span class="at">center =</span> <span class="cn">FALSE</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-6"><a href="#cb5-6"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb5-7"><a href="#cb5-7"></a>    <span class="fu">everything</span>(), </span>
+<span id="cb5-8"><a href="#cb5-8"></a>    <span class="at">names_to =</span> <span class="st">"feature"</span>, </span>
+<span id="cb5-9"><a href="#cb5-9"></a>    <span class="at">values_to =</span> <span class="st">"variance"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-10"><a href="#cb5-10"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(variance)) </span>
+<span id="cb5-11"><a href="#cb5-11"></a></span>
+<span id="cb5-12"><a href="#cb5-12"></a><span class="fu">kable</span>(credit_variances)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<thead>
+<tr class="header">
+<th style="text-align: left;">feature</th>
+<th style="text-align: right;">variance</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">num_of_loan</td>
+<td style="text-align: right;">0.98558800</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">interest_rate</td>
+<td style="text-align: right;">0.98258481</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">num_of_delayed_payment</td>
+<td style="text-align: right;">0.98150878</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">num_credit_inquiries</td>
+<td style="text-align: right;">0.97843457</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">num_bank_accounts</td>
+<td style="text-align: right;">0.97841843</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">total_emi_per_month</td>
+<td style="text-align: right;">0.97569764</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">annual_income</td>
+<td style="text-align: right;">0.97397017</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">num_credit_card</td>
+<td style="text-align: right;">0.97044729</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">amount_invested_monthly</td>
+<td style="text-align: right;">0.90345646</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">outstanding_debt</td>
+<td style="text-align: right;">0.41753915</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">monthly_inhand_salary</td>
+<td style="text-align: right;">0.35255863</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">delay_from_due_date</td>
+<td style="text-align: right;">0.33223435</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">changed_credit_limit</td>
+<td style="text-align: right;">0.30855481</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">monthly_balance</td>
+<td style="text-align: right;">0.22081631</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">credit_history_months</td>
+<td style="text-align: right;">0.15974632</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">age</td>
+<td style="text-align: right;">0.07874258</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">credit_utilization_ratio</td>
+<td style="text-align: right;">0.02527138</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="set-variance-threshold-and-create-a-mask" class="level2">
+<h2 class="anchored" data-anchor-id="set-variance-threshold-and-create-a-mask">Set variance threshold and create a mask</h2>
+<p>We can scan down the variances and identify a natural cut-off between <code>amount_invested_monthly</code> and <code>outstanding_debt</code>, however, that would remove too many features. The next cutoff between <code>credit_history_month</code> and <code>age</code> seems more appropriate. So, we can create a variance filter with a threshold of 0.1.</p>
+<p>We use <code>pull()</code> to get an array of feature names that we can use as a mask.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>low_var_filter <span class="ot">&lt;-</span> credit_variances <span class="sc">%&gt;%</span> </span>
+<span id="cb6-2"><a href="#cb6-2"></a>  <span class="fu">filter</span>(variance <span class="sc">&lt;</span> <span class="fl">0.1</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-3"><a href="#cb6-3"></a>  <span class="fu">pull</span>(feature)</span>
+<span id="cb6-4"><a href="#cb6-4"></a></span>
+<span id="cb6-5"><a href="#cb6-5"></a>low_var_filter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "age"                      "credit_utilization_ratio"</code></pre>
+</div>
+</div>
+</section>
+<section id="apply-the-mask" class="level2">
+<h2 class="anchored" data-anchor-id="apply-the-mask">Apply the mask</h2>
+<p>We then apply the mask to the data frame. Notice that it removes ‘age’ and <code>credit_utilization_ratio</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>filtered_credit_df <span class="ot">&lt;-</span> credit_df <span class="sc">%&gt;%</span> </span>
+<span id="cb8-2"><a href="#cb8-2"></a>  <span class="fu">select</span>(<span class="sc">-</span><span class="fu">all_of</span>(low_var_filter))</span>
+<span id="cb8-3"><a href="#cb8-3"></a></span>
+<span id="cb8-4"><a href="#cb8-4"></a><span class="fu">kable</span>(filtered_credit_df <span class="sc">%&gt;%</span> <span class="fu">head</span>(<span class="dv">5</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped">
+<colgroup>
+<col style="width: 5%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 5%">
+<col style="width: 5%">
+<col style="width: 4%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 7%">
+<col style="width: 7%">
+<col style="width: 6%">
+<col style="width: 7%">
+<col style="width: 8%">
+<col style="width: 5%">
+<col style="width: 7%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: right;">annual_income</th>
+<th style="text-align: right;">monthly_inhand_salary</th>
+<th style="text-align: right;">num_bank_accounts</th>
+<th style="text-align: right;">num_credit_card</th>
+<th style="text-align: right;">interest_rate</th>
+<th style="text-align: right;">num_of_loan</th>
+<th style="text-align: right;">delay_from_due_date</th>
+<th style="text-align: right;">num_of_delayed_payment</th>
+<th style="text-align: right;">changed_credit_limit</th>
+<th style="text-align: right;">num_credit_inquiries</th>
+<th style="text-align: right;">outstanding_debt</th>
+<th style="text-align: right;">total_emi_per_month</th>
+<th style="text-align: right;">amount_invested_monthly</th>
+<th style="text-align: right;">monthly_balance</th>
+<th style="text-align: right;">credit_history_months</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">16176.83</td>
+<td style="text-align: right;">1585.070</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">0.56</td>
+<td style="text-align: right;">2445</td>
+<td style="text-align: right;">1200.70</td>
+<td style="text-align: right;">21.96219</td>
+<td style="text-align: right;">38.32601</td>
+<td style="text-align: right;">358.2188</td>
+<td style="text-align: right;">241</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">82383.04</td>
+<td style="text-align: right;">6661.253</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">1.71</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">1218.57</td>
+<td style="text-align: right;">162.10896</td>
+<td style="text-align: right;">123.97997</td>
+<td style="text-align: right;">630.0364</td>
+<td style="text-align: right;">392</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">28805.34</td>
+<td style="text-align: right;">2309.445</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">19</td>
+<td style="text-align: right;">7.02</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">796.45</td>
+<td style="text-align: right;">47.19512</td>
+<td style="text-align: right;">139.90769</td>
+<td style="text-align: right;">303.8417</td>
+<td style="text-align: right;">385</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">45412.95</td>
+<td style="text-align: right;">3520.412</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">23.07</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">4601.39</td>
+<td style="text-align: right;">113.69155</td>
+<td style="text-align: right;">199.56341</td>
+<td style="text-align: right;">318.7863</td>
+<td style="text-align: right;">55</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">17296.38</td>
+<td style="text-align: right;">1480.365</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">30</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">17.34</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">4624.73</td>
+<td style="text-align: right;">49.36071</td>
+<td style="text-align: right;">78.16123</td>
+<td style="text-align: right;">280.5146</td>
+<td style="text-align: right;">92</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+</section>
+<section id="a-better-way-tidymodels" class="level1">
+<h1>A better way – <code>tidymodels</code></h1>
+<p>Creating a low-variance mask manually is good for learning purposes, but in real-world scenarios, it’s nice to have something more automated – that will work in a production pipeline – and more intelligent – that can handle categorical variables. The <code>recipes</code> package in <code>tidymodels</code> provides <code>step_zv()</code> and <code>step_nzv()</code> to features with zero or near-zero variance, respectively.</p>
+<section id="load-data-with-categorical-variables" class="level2">
+<h2 class="anchored" data-anchor-id="load-data-with-categorical-variables">Load data with categorical variables</h2>
+<p>To demonstrate the <code>recipes</code> approach, we’ll load all the features, so we have both continuous and categorical variables.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>credit_df <span class="ot">&lt;-</span> </span>
+<span id="cb9-2"><a href="#cb9-2"></a>  <span class="fu">read_csv</span>(<span class="st">"data/credit_data.csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>To make this example interesting, we’ll insert a couple of low-variance features – <code>num_credit_card</code> and <code>num_credit_inquiries</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>credit_df <span class="ot">&lt;-</span> credit_df <span class="sc">%&gt;%</span> </span>
+<span id="cb10-2"><a href="#cb10-2"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb10-3"><a href="#cb10-3"></a>    <span class="at">num_credit_card_rand =</span> <span class="fu">runif</span>(<span class="fu">n</span>()),</span>
+<span id="cb10-4"><a href="#cb10-4"></a>    <span class="at">num_credit_inquiries_rand =</span> <span class="fu">runif</span>(<span class="fu">n</span>()),</span>
+<span id="cb10-5"><a href="#cb10-5"></a>    <span class="at">num_credit_card =</span> <span class="fu">if_else</span>(</span>
+<span id="cb10-6"><a href="#cb10-6"></a>      num_credit_card_rand <span class="sc">&lt;</span> .<span class="dv">95</span>, <span class="dv">5</span>, num_credit_card),</span>
+<span id="cb10-7"><a href="#cb10-7"></a>    <span class="at">num_credit_inquiries =</span> <span class="fu">if_else</span>(</span>
+<span id="cb10-8"><a href="#cb10-8"></a>      num_credit_inquiries_rand <span class="sc">&lt;</span> .<span class="dv">95</span>, <span class="dv">3</span>, num_credit_inquiries)</span>
+<span id="cb10-9"><a href="#cb10-9"></a>  ) <span class="sc">%&gt;%</span> </span>
+<span id="cb10-10"><a href="#cb10-10"></a>  <span class="fu">select</span>(<span class="sc">-</span>num_credit_card_rand, <span class="sc">-</span>num_credit_inquiries_rand)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="define-a-recipe-object" class="level2">
+<h2 class="anchored" data-anchor-id="define-a-recipe-object">Define a recipe object</h2>
+<p>Then we define a recipe object. Notice the first parameter is a formula. We define <code>credit_score</code> as the target variable and all other features as predictor variables.</p>
+<p>We add the <code>step_zv()</code> step first. No-variance features will cause problems when we normalize the data with <code>step_scale()</code>. We apply the no-variance step to all predictors and the scale step to only the numeric predictors. Then, we apply <code>step_nzv()</code> to remove low-variance features. <code>prep()</code> “fits” the recipe to the data.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="fu">library</span>(recipes) </span>
+<span id="cb11-2"><a href="#cb11-2"></a></span>
+<span id="cb11-3"><a href="#cb11-3"></a>low_variance_recipe <span class="ot">&lt;-</span> <span class="fu">recipe</span>(credit_score <span class="sc">~</span> ., <span class="at">data =</span> credit_df) <span class="sc">%&gt;%</span></span>
+<span id="cb11-4"><a href="#cb11-4"></a>  <span class="fu">step_zv</span>(<span class="fu">all_predictors</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb11-5"><a href="#cb11-5"></a>  <span class="fu">step_scale</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb11-6"><a href="#cb11-6"></a>  <span class="fu">step_nzv</span>(<span class="fu">all_predictors</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb11-7"><a href="#cb11-7"></a>  <span class="fu">prep</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>We can use <code>tidy()</code> to peek into the recipe and see the effect it will have on the trained data set it was trained on. Here we look at the third step of the recipe – <code>step_nzv()</code>. We can see that it will remove our two low-variance features – <code>num_credit_card</code> and <code>num_credit_inquiries</code>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a><span class="fu">tidy</span>(low_variance_recipe, <span class="at">number =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 2
+  terms                id       
+  &lt;chr&gt;                &lt;chr&gt;    
+1 num_credit_card      nzv_nAlyV
+2 num_credit_inquiries nzv_nAlyV</code></pre>
+</div>
+</div>
+</section>
+<section id="apply-the-recipe-to-credit_df" class="level2">
+<h2 class="anchored" data-anchor-id="apply-the-recipe-to-credit_df">Apply the recipe to <code>credit_df</code></h2>
+<p>In <code>recipes</code> to apply a trained recipe to a data set, we can use <code>bake()</code>. The <code>new_data</code> parameter allows us to specify the data set “bake” the recipe with. If we pass NULL, it will bake the same data that the recipe was trained on.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>filtered_credit_df <span class="ot">&lt;-</span> low_variance_recipe <span class="sc">%&gt;%</span> <span class="fu">bake</span>(<span class="at">new_data =</span> <span class="cn">NULL</span>)</span>
+<span id="cb14-2"><a href="#cb14-2"></a></span>
+<span id="cb14-3"><a href="#cb14-3"></a><span class="fu">names</span>(filtered_credit_df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] "month"                    "age"                     
+ [3] "occupation"               "annual_income"           
+ [5] "monthly_inhand_salary"    "num_bank_accounts"       
+ [7] "interest_rate"            "num_of_loan"             
+ [9] "delay_from_due_date"      "num_of_delayed_payment"  
+[11] "changed_credit_limit"     "outstanding_debt"        
+[13] "credit_utilization_ratio" "payment_of_min_amount"   
+[15] "total_emi_per_month"      "amount_invested_monthly" 
+[17] "payment_behaviour"        "monthly_balance"         
+[19] "credit_history_months"    "credit_score"            </code></pre>
+</div>
+</div>
+<p>If we compare the names in the original <code>credit_df</code> to the names in the <code>filtered_credit_df</code>, we can see that <code>num_credit_card</code> and <code>num_credit_inquiries</code> were removed.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="fu">setdiff</span>(<span class="fu">names</span>(credit_df), <span class="fu">names</span>(filtered_credit_df))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] "num_credit_card"      "num_credit_inquiries"</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<script src="https://giscus.app/client.js" data-repo="mpickard-dataprof/dataprof-website" data-repo-id="R_kgDOIt1A1Q" data-category="General" data-category-id="DIC_kwDOIt1A1c4CUVbk" data-mapping="title" data-reactions-enabled="1" data-emit-metadata="0" data-input-position="top" data-theme="light" data-lang="en" crossorigin="anonymous" async="">
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
