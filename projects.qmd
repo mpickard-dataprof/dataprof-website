@@ -1,6 +1,13 @@
 ---
 title: "Projects"
 format: html
+listing:
+  contents: 
+    - projects/
+  sort: "title"
+  type: default
+  categories: true
+page-layout: full
 ---
 
 A place to showcase my projects.

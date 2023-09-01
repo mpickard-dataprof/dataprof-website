@@ -2,11 +2,18 @@
   {
     "listing": "/blog.html",
     "items": [
-      "/blog/dataprep/excel_conditional_aggregation.html",
-      "/blog/nlp/gc_topic_model_best_fit.html",
-      "/blog/dataprep/simple-low-variance-feature-selection-mask-in-r.html",
-      "/blog/dataprep/regex-preserve_currency_tokens.html",
-      "/blog/machinelearn/using-xgboost-and-sklearn-to-predict-loan-default.html"
+      "/blog/dataprep/inner_join/inner_join.html",
+      "/blog/dataprep/left_join/left_join.html",
+      "/blog/dataprep/outer_join/outer_join.html",
+      "/blog/dataprep/right_join/right_join.html",
+      "/blog/dataprep/excel_conditional_aggregation/excel_conditional_aggregation.html",
+      "/blog/nlp/gc_topic_model/gc_topic_model_best_fit.html",
+      "/blog/dataprep/low_variance_mask/simple-low-variance-feature-selection-mask-in-r.html",
+      "/blog/dataprep/regex_preserve_currency_tokens/regex-preserve_currency_tokens.html"
     ]
+  },
+  {
+    "listing": "/projects.html",
+    "items": []
   }
 ]

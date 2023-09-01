@@ -49,5 +49,29 @@
   },
   "blog/dataprep/excel_conditional_aggregation.qmd": {
     "excel_conditional_aggregation.html": "c82abc33"
+  },
+  "blog/dataprep/inner_join/inner_join.qmd": {
+    "inner_join.html": "2710c07d"
+  },
+  "blog/dataprep/left_join/left_join.qmd": {
+    "left_join.html": "19b5b530"
+  },
+  "blog/dataprep/outer_join/outer_join.qmd": {
+    "outer_join.html": "0a0c626c"
+  },
+  "blog/dataprep/right_join/right_join.qmd": {
+    "right_join.html": "65cf670e"
+  },
+  "blog/dataprep/excel_conditional_aggregation/excel_conditional_aggregation.qmd": {
+    "excel_conditional_aggregation.html": "0cd6e2dd"
+  },
+  "blog/dataprep/low_variance_mask/simple-low-variance-feature-selection-mask-in-r.qmd": {
+    "simple-low-variance-feature-selection-mask-in-r.html": "22dd620b"
+  },
+  "blog/dataprep/regex_preserve_currency_tokens/regex-preserve_currency_tokens.qmd": {
+    "regex-preserve_currency_tokens.html": "124c478a"
+  },
+  "blog/nlp/gc_topic_model/gc_topic_model_best_fit.qmd": {
+    "gc_topic_model_best_fit.html": "4db6bdcc"
   }
 }

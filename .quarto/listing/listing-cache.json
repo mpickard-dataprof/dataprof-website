@@ -4,6 +4,9 @@
       "blog/dataprep",
       "blog/machinelearn",
       "blog/nlp"
+    ],
+    "projects.qmd": [
+      "projects/"
     ]
   }
 }
